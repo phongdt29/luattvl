@@ -14,10 +14,8 @@
       rel="stylesheet">
 
    <!-- Icon Font Stylesheet -->
-   <link rel="stylesheet" href="cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
-      integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
-      crossorigin="anonymous" referrerpolicy="no-referrer" />
-   <link href="cdn.jsdelivr.net/npm/bootstrap-icons%401.4.1/font/bootstrap-icons.css" rel="stylesheet">
+   <link rel="stylesheet" href="public/libs/font-awesome/6.7.1/css/all.min.css"/>
+   <link href="public/fonts/bootstrap-icons.css" rel="stylesheet">
 
    <!-- Libraries Stylesheet -->
    <link rel="stylesheet" href="public/lib/animate/animate.min.css" />
@@ -28,7 +26,14 @@
    <!-- Customized Bootstrap Stylesheet -->
    <link href="public/css/bootstrap.min.css" rel="stylesheet">
 
-    <?php wp_head(); ?>
+   <!-- Template Stylesheet -->
+   <link href="public/css/style.css" rel="stylesheet">
+   <link rel="stylesheet" href="public/css/css.css">
+   <link rel="stylesheet" href="public/css/ionicons.min.css">
+   <link rel="stylesheet" href="public/css/icomoon.css">
+   <!-- Bootstrap CSS -->
+
+   <?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
 <header>

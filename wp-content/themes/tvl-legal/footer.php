@@ -56,5 +56,17 @@
 <!-- Footer End -->
 
 <?php wp_footer(); ?>
+
+<script src="public/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="public/js/bootstrap.bundle.min.js"></script>
+<script src="public/lib/wow/wow.min.js"></script>
+<script src="public/lib/easing/easing.min.js"></script>
+<script src="public/lib/waypoints/waypoints.min.js"></script>
+<script src="public/lib/counterup/counterup.min.js"></script>
+<script src="public/lib/lightbox/js/lightbox.min.js"></script>
+<script src="public/lib/owlcarousel/owl.carousel.min.js"></script>
+
+<!-- Template Javascript -->
+<script src="public/js/main.js"></script>
 </body>
 </html>
