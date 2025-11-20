@@ -1,0 +1,127 @@
+.ftco-section {
+    padding: 7em 0;
+    position: relative;
+}
+@media (max-width: 767.98px) {
+    .ftco-section {
+        padding: 6em 0;
+    }
+}
+
+.ftco-no-pt {
+    padding-top: 0 !important;
+}
+.services-wrap {
+    position: relative;
+    z-index: 0;
+}
+.services-wrap:after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    content: "";
+    height: 140px;
+    background: #0059ff;
+}
+@media (max-width: 767.98px) {
+    .services-wrap:after {
+        height: 100%;
+    }
+}
+
+.services {
+    width: 100%;
+    background: #ffffff;
+    padding: 20px;
+    position: relative;
+    border-radius: 4px;
+    -webkit-box-shadow: 0px 15px 34px -10px rgba(0, 0, 0, 0.09);
+    -moz-box-shadow: 0px 15px 34px -10px rgba(0, 0, 0, 0.09);
+    box-shadow: 0px 15px 34px -10px rgba(0, 0, 0, 0.09);
+}
+@media (max-width: 991.98px) {
+    .services {
+        margin-bottom: 30px;
+    }
+}
+.services .icon {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    margin: 0 auto;
+    background: rgba(0, 0, 0, 0.05);
+    margin-bottom: 10px;
+}
+.services .icon span {
+    color: #0059ff;
+    font-size: 30px;
+}
+.services .text h3 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* .ftco-animate {
+    opacity: 0;
+    visibility: hidden;
+} */
+.sidebar-box {
+    margin-bottom: 40px;
+    font-size: 15px;
+    width: 100%;
+    float: left;
+    background: #fff;
+}
+.sidebar-box *:last-child {
+    margin-bottom: 0;
+}
+.sidebar-box h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.categories li,
+.sidelink li {
+    position: relative;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+    list-style: none;
+}
+.categories li:last-child,
+.sidelink li:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.categories li a,
+.sidelink li a {
+    display: block;
+    color: #1a1a1a;
+}
+.categories li a span,
+.sidelink li a span {
+    position: absolute;
+    right: 0;
+    top: 0;
+    color: #ccc;
+}
+.categories li a:hover,
+.categories li a:focus,
+.sidelink li a:hover,
+.sidelink li a:focus {
+    outline: none;
+    color: #0059ff;
+}
+.categories li.active a,
+.sidelink li.active a {
+    color: #0059ff;
+}
+.categories li.active a span,
+.sidelink li.active a span {
+    color: #0059ff;
+}
