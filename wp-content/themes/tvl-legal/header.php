@@ -77,7 +77,6 @@
          <a href="team.html" class="nav-item nav-link">Đội ngũ</a>
          <a href="contact.html" class="nav-item nav-link">Liên hệ</a>
       </div>
-      <!-- <a href="#" class="btn btn-primary rounded-pill py-2 px-4 my-3 my-lg-0 flex-shrink-0">Get Started</a> -->
    </div>
 </nav>
 </header>
