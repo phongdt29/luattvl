@@ -14,23 +14,23 @@
       rel="stylesheet">
 
    <!-- Icon Font Stylesheet -->
-   <link rel="stylesheet" href="public/libs/font-awesome/6.7.1/css/all.min.css"/>
-   <link href="public/fonts/bootstrap-icons.css" rel="stylesheet">
+   <link rel="stylesheet" href="/public/libs/font-awesome/6.7.1/css/all.min.css"/>
+   <link href="/public/fonts/bootstrap-icons.css" rel="stylesheet">
 
    <!-- Libraries Stylesheet -->
-   <link rel="stylesheet" href="public/lib/animate/animate.min.css" />
-   <link href="public/lib/lightbox/css/lightbox.min.css" rel="stylesheet">
-   <link href="public/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+   <link rel="stylesheet" href="/public/lib/animate/animate.min.css" />
+   <link href="/public/lib/lightbox/css/lightbox.min.css" rel="stylesheet">
+   <link href="/public/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
 
 
    <!-- Customized Bootstrap Stylesheet -->
-   <link href="public/css/bootstrap.min.css" rel="stylesheet">
+   <link href="/public/css/bootstrap.min.css" rel="stylesheet">
 
    <!-- Template Stylesheet -->
-   <link href="public/css/style.css" rel="stylesheet">
-   <link rel="stylesheet" href="public/css/css.css">
-   <link rel="stylesheet" href="public/css/ionicons.min.css">
-   <link rel="stylesheet" href="public/css/icomoon.css">
+   <link href="/public/css/style.css" rel="stylesheet">
+   <link rel="stylesheet" href="/public/css/css.css">
+   <link rel="stylesheet" href="/public/css/ionicons.min.css">
+   <link rel="stylesheet" href="/public/css/icomoon.css">
    <!-- Bootstrap CSS -->
 
    <?php wp_head(); ?>
