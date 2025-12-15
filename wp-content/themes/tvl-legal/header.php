@@ -39,8 +39,8 @@
 <header>
 <nav class="navbar navbar-expand-lg navbar-light">
    <div class="row">
-      <a href="index.html" class="navbar-brand p-0">
-         <img src="public/img/logo.png" alt="Logo">
+      <a href="<?php echo esc_url(home_url('/')); ?>" class="navbar-brand p-0">
+         <img src="<?php echo get_template_directory_uri(); ?>/public/img/logo.png" alt="<?php bloginfo('name'); ?>">
       </a>
    </div>
    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
@@ -50,9 +50,8 @@
       <?php
       wp_nav_menu(array(
          'theme_location' => 'main-menu',
-         'container' => 'div',
-         'container_class' => 'navbar-nav ms-auto py-0',
-         'menu_class' => '',
+         'container' => false,
+         'menu_class' => 'navbar-nav ms-auto py-0',
          'fallback_cb' => false,
          'depth' => 2,
          'walker' => new WP_Bootstrap_Navwalker()

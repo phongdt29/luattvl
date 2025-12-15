@@ -162,67 +162,30 @@ get_header(); ?>
          <h1 class="display-6 mb-5 pb-3" style="color: #fff;">LĨNH VỰC HOẠT ĐỘNG</h1>
       </div>
       <div class="owl-carousel cat-carousel wow fadeInUp" data-wow-delay="0.2s">
-         <div class="cat-item p-3">
-            <div class="cat-img mb-3">
-               <img src="public/img/category/1.jpg" class="img-fluid w-100 rounded" alt="">
-            </div>
-            <a href="cat_1.html" class="h5 d-inline-block mb-3">Luật sư Tranh Tụng</a>
-         </div>
-         <div class="cat-item p-3">
-            <div class="cat-img mb-3">
-               <img src="public/img/category/2.jpg" class="img-fluid w-100 rounded" alt="">
-            </div>
-            <a href="cat_2.html" class="h5 d-inline-block mb-3">Tố tụng tại Trọng tài</a>
-         </div>
-         <div class="cat-item p-3">
-            <div class="cat-img mb-3">
-               <img src="public/img/category/3.jpg" class="img-fluid w-100 rounded" alt="">
-            </div>
-            <a href="cat_3.html" class="h5 d-inline-block mb-3">Đầu tư & Doanh nghiệp</a>
-         </div>
-         <div class="cat-item p-3">
-            <div class="cat-img mb-3">
-               <img src="public/img/category/4.jpg" class="img-fluid w-100 rounded" alt="">
-            </div>
-            <a href="cat_4.html" class="h5 d-inline-block mb-3">Sở hữu trí tuệ</a>
-         </div>
-         <div class="cat-item p-3">
-            <div class="cat-img mb-3">
-               <img src="public/img/category/5.jpg" class="img-fluid w-100 rounded" alt="">
-            </div>
-            <a href="cat_5.html" class="h5 d-inline-block mb-3">Lao Động</a>
-         </div>
-         <div class="cat-item p-3">
-            <div class="cat-img mb-3">
-               <img src="public/img/category/6.jpg" class="img-fluid w-100 rounded" alt="">
-            </div>
-            <a href="cat_6.html" class="h5 d-inline-block mb-3">Kế Toán - Thuế</a>
-         </div>
-         <div class="cat-item p-3">
-            <div class="cat-img mb-3">
-               <img src="public/img/category/7.jpg" class="img-fluid w-100 rounded" alt="">
-            </div>
-            <a href="cat_7.html" class="h5 d-inline-block mb-3">Bất động sản & Xây dựng</a>
-         </div>
-         <div class="cat-item p-3">
-            <div class="cat-img mb-3">
-               <img src="public/img/category/8.jpg" class="img-fluid w-100 rounded" alt="">
-            </div>
-            <a href="cat_8.html" class="h5 d-inline-block mb-3">Mua bán & Sáp nhập (M&A)</a>
-         </div>
-         <div class="cat-item p-3">
-            <div class="cat-img mb-3">
-               <img src="public/img/category/9.jpg" class="img-fluid w-100 rounded" alt="">
-            </div>
-            <a href="cat_9.html" class="h5 d-inline-block mb-3">Tài chính - Ngân hàng</a>
-         </div>
-         <div class="cat-item p-3">
-            <div class="cat-img mb-3">
-               <img src="public/img/category/10.jpg" class="img-fluid w-100 rounded" alt="">
-            </div>
-            <a href="cat_10.html" class="h5 d-inline-block mb-3">Hôn nhân và gia đình - Thừa kế</a>
-         </div>
+         <?php
+         $practice_areas = get_terms(array(
+            'taxonomy' => 'practice_area',
+            'hide_empty' => false,
+            'orderby' => 'term_id',
+            'order' => 'ASC'
+         ));
 
+         if ($practice_areas && !is_wp_error($practice_areas)) :
+            foreach ($practice_areas as $area) :
+               $image_id = get_term_meta($area->term_id, 'practice_area_image', true);
+               $image_url = $image_id ? wp_get_attachment_image_url($image_id, 'medium') : get_template_directory_uri() . '/public/img/default-category.jpg';
+               $term_link = get_term_link($area);
+         ?>
+         <div class="cat-item p-3">
+            <div class="cat-img mb-3">
+               <img src="<?php echo esc_url($image_url); ?>" class="img-fluid w-100 rounded" alt="<?php echo esc_attr($area->name); ?>">
+            </div>
+            <a href="<?php echo esc_url($term_link); ?>" class="h5 d-inline-block mb-3"><?php echo esc_html($area->name); ?></a>
+         </div>
+         <?php
+            endforeach;
+         endif;
+         ?>
       </div>
    </div>
 </div>
@@ -307,111 +270,63 @@ get_header(); ?>
          <!-- Video Slider -->
          <div id="videoCarousel" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
-                              <div class="carousel-item active">
-                                    <a href="video/toa-dam-phap-luat-truc-tuyen-lao-dong-thoi-vu-va-bao-ve-quyen-loi-trong-thi-truong-linh-hoat.html">
-                     <div class="d-flex video-card">
-                        <div class="col-md-5 mb-2">
-                           <img class="img-video" src="../mediatvphapluat.congnb.com/files/News/2025/07/14/toa-dam-phap-luat-truc-tuyen-lao-dong-thoi-vu-va-bao-ve-quyen-loi-trong-thi-truong-linh-hoat-174939.jpg" alt="">
+               <?php
+               // Query all videos ordered by menu_order
+               $video_args = array(
+                  'post_type' => 'video',
+                  'posts_per_page' => -1,
+                  'orderby' => 'menu_order',
+                  'order' => 'ASC',
+                  'post_status' => 'publish'
+               );
+
+               $video_query = new WP_Query($video_args);
+
+               if ($video_query->have_posts()) :
+                  $videos_per_slide = 3; // 3 videos per carousel slide
+                  $counter = 0;
+                  $slide_index = 0;
+
+                  while ($video_query->have_posts()) : $video_query->the_post();
+                     $video_url = get_post_meta(get_the_ID(), '_video_url', true);
+                     $external_thumb = get_post_meta(get_the_ID(), '_external_thumbnail', true);
+
+                     // Start new carousel-item for every 3 videos
+                     if ($counter % $videos_per_slide == 0) :
+                        if ($counter > 0) echo '</div>'; // Close previous carousel-item
+                        $active_class = ($slide_index == 0) ? ' active' : '';
+                        echo '<div class="carousel-item' . $active_class . '">';
+                        $slide_index++;
+                     endif;
+                     ?>
+
+                     <a href="<?php echo esc_url($video_url); ?>">
+                        <div class="d-flex video-card">
+                           <div class="col-md-5 mb-2">
+                              <?php if ($external_thumb) : ?>
+                                 <img class="img-video" src="<?php echo esc_url($external_thumb); ?>" alt="<?php the_title(); ?>">
+                              <?php elseif (has_post_thumbnail()) : ?>
+                                 <?php the_post_thumbnail('thumbnail', array('class' => 'img-video')); ?>
+                              <?php else : ?>
+                                 <img class="img-video" src="<?php echo get_template_directory_uri(); ?>/public/img/default-video.jpg" alt="<?php the_title(); ?>">
+                              <?php endif; ?>
+                           </div>
+                           <h6 class="ms-3 align-self-start video-title"><?php the_title(); ?></h6>
                         </div>
-                        <h6 class="ms-3 align-self-start video-title">Tọa đàm Pháp Luật Trực Tuyến: Lao động thời vụ và bảo vệ quyền lợi trong thị trường linh hoạt</h6>
-                     </div>
-                  </a>
-                                    <a href="video/toa-dam-phap-luat-truc-tuyen-di-chuc-va-quyen-thua-ke-%e2%80%93-giao-thoa-giua-truyen-thong-va-phap-luat.html">
-                     <div class="d-flex video-card">
-                        <div class="col-md-5 mb-2">
-                           <img class="img-video" src="../mediatvphapluat.congnb.com/files/News/2025/07/08/toa-dam-phap-luat-truc-tuyen-di-chuc-va-quyen-thua-ke-giao-thoa-giua-truyen-thong-va-phap-luat-111437.jpg" alt="">
-                        </div>
-                        <h6 class="ms-3 align-self-start video-title">Tọa đàm Pháp Luật Trực Tuyến: Di chúc và quyền thừa kế – Giao thoa giữa truyền thống và pháp luật</h6>
-                     </div>
-                  </a>
-                                    <a href="video/toa-dam-phap-luat-truc-tuyen-thue-%e2%80%93-cho-thue-nha-va-nhung-khuc-mac-phap-ly-dien-hinh.html">
-                     <div class="d-flex video-card">
-                        <div class="col-md-5 mb-2">
-                           <img class="img-video" src="../mediatvphapluat.congnb.com/files/News/2025/07/08/toa-dam-phap-luat-truc-tuyen-thue-cho-thue-nha-va-nhung-khuc-mac-phap-ly-dien-hinh-163338.jpg" alt="">
-                        </div>
-                        <h6 class="ms-3 align-self-start video-title">Tọa đàm Pháp Luật Trực Tuyến: Thuê – Cho thuê nhà và những khúc mắc pháp lý điển hình</h6>
-                     </div>
-                  </a>
-                                 </div>
-                              <div class="carousel-item ">
-                                    <a href="video/toa-dam-phap-luat-truc-tuyen-giai-phap-nao-cho-nan-o-nhiem-tieng-on-tu-am-thanh-karaoke-hang-xom.html">
-                     <div class="d-flex video-card">
-                        <div class="col-md-5 mb-2">
-                           <img class="img-video" src="../mediatvphapluat.congnb.com/files/News/2025/07/07/toa-dam-phap-luat-truc-tuyen-giai-phap-nao-cho-nan-o-nhiem-tieng-on-tu-am-thanh-karaoke-hang-xom-163234.jpg" alt="">
-                        </div>
-                        <h6 class="ms-3 align-self-start video-title">Tọa đàm Pháp Luật Trực Tuyến: Giải pháp nào cho nạn ô nhiễm tiếng ồn từ âm thanh karaoke hàng xóm</h6>
-                     </div>
-                  </a>
-                                    <a href="video/toa-dam-phap-luat-truc-tuyen-day-them-hoc-them-tu-quy-dinh-den-thuc-tien-ap-dung.html">
-                     <div class="d-flex video-card">
-                        <div class="col-md-5 mb-2">
-                           <img class="img-video" src="../mediatvphapluat.congnb.com/files/News/2025/07/02/toa-dam-phap-luat-truc-tuyen-day-them-hoc-them--tu-quy-dinh-den-thuc-tien-ap-dung-182439.jpg" alt="">
-                        </div>
-                        <h6 class="ms-3 align-self-start video-title">Tọa đàm Pháp Luật Trực Tuyến: Dạy thêm, Học thêm - Từ quy định đến thực tiễn áp dụng</h6>
-                     </div>
-                  </a>
-                                    <a href="video/thac-si-luat-su-tran-hoang-hai-phong-tham-gia-chuong-trinh-toa-dam-phap-luat-truc-tuyen-ve-chu-de-%e2%80%9cbao-luc-trong-gioi-tre-ngay-nay%e2%80%9d.html">
-                     <div class="d-flex video-card">
-                        <div class="col-md-5 mb-2">
-                           <img class="img-video" src="../mediatvphapluat.congnb.com/files/News/2024/10/31/toa-dam-phap-luat-truc-tuyen-bao-luc-trong-gioi-tre-ngay-nay-143234.jpg" alt="">
-                        </div>
-                        <h6 class="ms-3 align-self-start video-title">Thạc sĩ - Luật sư Trần Hoàng Hải Phong tham gia chương trình Tọa đàm pháp luật trực tuyến về chủ đề “Bạo lực trong giới trẻ ngày nay”.</h6>
-                     </div>
-                  </a>
-                                 </div>
-                              <div class="carousel-item ">
-                                    <a href="video/thac-si-luat-su-tran-hoang-hai-phong-tham-gia-chuong-trinh-toa-dam-phap-luat-truc-tuyen-ve-chu-de-%e2%80%9cphong-ngua-chay-no-tai-cac-quan-karaoke-hien-nay%e2%80%9d.html">
-                     <div class="d-flex video-card">
-                        <div class="col-md-5 mb-2">
-                           <img class="img-video" src="../mediatvphapluat.congnb.com/upload/post/2023/10/13/toa-dam-phap-luat-truc-tuyen-phong-ngua-chay-no-tai-cac-quan-karaoke-hien-nay-20231013202134-654417.jpg" alt="">
-                        </div>
-                        <h6 class="ms-3 align-self-start video-title">Thạc sĩ - Luật sư Trần Hoàng Hải Phong tham gia chương trình Tọa đàm pháp luật trực tuyến về chủ đề “Phòng ngừa cháy, nổ tại các quán karaoke hiện nay”.</h6>
-                     </div>
-                  </a>
-                                    <a href="video/thac-si-luat-su-tran-hoang-hai-phong-tham-gia-chuong-trinh-toa-dam-phap-luat-ve-chu-de-%e2%80%9ctiep-tay-cho-dong-bon-trom-cap-tai-san-co-phai-chiu-trach-nhiem-hinh-su-hay-khong%e2%80%9d.html">
-                     <div class="d-flex video-card">
-                        <div class="col-md-5 mb-2">
-                           <img class="img-video" src="../mediatvphapluat.congnb.com/upload/post/2023/06/22/tiep-tay-cho-dong-bon-trom-cap-tai-san-co-phai-chiu-trach-nhiem-hinh-su-hay-khong-20230622154611-645691.jpg" alt="">
-                        </div>
-                        <h6 class="ms-3 align-self-start video-title">Thạc sĩ - Luật sư Trần Hoàng Hải Phong tham gia chương trình Tọa đàm pháp luật về chủ đề “Tiếp tay cho đồng bọn trộm cắp tài sản có phải chịu trách nhiệm hình sự hay không?”</h6>
-                     </div>
-                  </a>
-                                    <a href="video/luat-su-tran-van-linh-tham-gia-chuong-trinh-thoi-su-phap-luat-%e2%80%9chinh-phat-nao-cho-doi-tuong-pha-huy-cong-trinh-quan-trong-ve-an-ninh-quoc-gia%e2%80%9d.html">
-                     <div class="d-flex video-card">
-                        <div class="col-md-5 mb-2">
-                           <img class="img-video" src="../mediatvphapluat.congnb.com/upload/post/2023/06/16/hinh-phat-nao-cho-doi-tuong-pha-huy-cong-trinh-quan-trong-ve-an-ninh-quoc-gia-20230616103245-952519.jpg" alt="">
-                        </div>
-                        <h6 class="ms-3 align-self-start video-title">Luật sư Trần Vân Linh tham gia chương trình Thời sự pháp luật “Hình phạt nào cho đối tượng phá hủy công trình quan trọng về an ninh quốc gia?”</h6>
-                     </div>
-                  </a>
-                                 </div>
-                              <div class="carousel-item ">
-                                    <a href="video/luat-su-tran-van-linh-tham-gia-chuong-trinh-thoi-su-phap-luat-%e2%80%9cxay-nha-vuot-qua-dien-tich-dat-o-tren-so-do-nguoi-su-dung-dat-lam-the-nao-de-hop-phap-hoa-phan-dat-du-nay%e2%80%9d.html">
-                     <div class="d-flex video-card">
-                        <div class="col-md-5 mb-2">
-                           <img class="img-video" src="../mediatvphapluat.congnb.com/upload/post/2023/06/16/xay-nha-vuot-qua-dien-tich-dat-o-tren-so-do-nguoi-su-dung-dat-lam-the-nao-de-hop-phap-hoa-phan-dat-du-nay-20230616100318-107736.jpg" alt="">
-                        </div>
-                        <h6 class="ms-3 align-self-start video-title">Luật sư Trần Vân Linh tham gia chương trình Thời sự pháp luật “Xây nhà vượt quá diện tích đất ở trên Sổ đỏ, người sử dụng đất làm thế nào để hợp pháp hóa phần đất dư này?”</h6>
-                     </div>
-                  </a>
-                                    <a href="video/thac-si-luat-su-tran-hoang-hai-phong-tham-gia-chuong-trinh-toa-dam-phap-luat-truc-tuyen-ve-chu-de-%e2%80%9cthi-truong-bat-dong-san-co-tin-hieu-phuc-hoi-sau-nghi-quyet-so-33%e2%80%9d.html">
-                     <div class="d-flex video-card">
-                        <div class="col-md-5 mb-2">
-                           <img class="img-video" src="../mediatvphapluat.congnb.com/upload/post/2023/04/18/toa-dam-phap-luat-truc-tuyen-thi-truong-bat-dong-san-co-tin-hieu-hoi-phuc-sau-nghi-quyet-so-33-20230418202538-805271.jpg" alt="">
-                        </div>
-                        <h6 class="ms-3 align-self-start video-title">Thạc sĩ - Luật sư Trần Hoàng Hải Phong tham gia chương trình Tọa đàm pháp luật trực tuyến về chủ đề “Thị trường bất động sản có tín hiệu phục hồi sau Nghị quyết số 33”.</h6>
-                     </div>
-                  </a>
-                                    <a href="video/thac-si-luat-su-tran-hoang-hai-phong-tham-gia-chuong-trinh-toa-dam-phap-luat-truc-tuyen-ve-chu-de-%e2%80%9cgoc-nhin-phap-ly-trong-sua-doi-nghi-dinh-65-se-giai-quyet-nhung-van-de-bat-cap-ve-tr">
-                     <div class="d-flex video-card">
-                        <div class="col-md-5 mb-2">
-                           <img class="img-video" src="../mediatvphapluat.congnb.com/upload/post/2023/02/16/toa-dam-phap-luat-truc-tuyen-goc-nhin-phap-ly-trong-sua-doi-nd65-se-giai-quyet-nhung-van-de-bat-cap-ve-trai-phieu-hien-nay-20230216174822-998858.49.de" alt="">
-                        </div>
-                        <h6 class="ms-3 align-self-start video-title">Thạc sĩ - Luật sư Trần Hoàng Hải Phong tham gia chương trình Tọa đàm pháp luật trực tuyến về chủ đề “Góc nhìn pháp lý trong sửa đổi Nghị định 65 sẽ giải quyết những vấn đề bất cập về trái phiếu hiện nay”.</h6>
-                     </div>
-                  </a>
-                                 </div>
-                              
+                     </a>
+
+                     <?php
+                     $counter++;
+                  endwhile;
+
+                  // Close the last carousel-item
+                  if ($counter > 0) echo '</div>';
+
+                  wp_reset_postdata();
+               else :
+                  echo '<div class="carousel-item active"><p class="text-center">Chưa có video nào được thêm.</p></div>';
+               endif;
+               ?>
             </div>
             <!-- Điều khiển carousel -->
          </div>
@@ -458,7 +373,7 @@ get_header(); ?>
                   <div class="team-item">
                      <div class="team-img">
                         <?php if (has_post_thumbnail()) : ?>
-                           <?php the_post_thumbnail('full', array('class' => 'img-fluid', 'alt' => get_the_title())); ?>
+                           <?php the_post_thumbnail('thumbnail', array('class' => 'img-fluid', 'alt' => get_the_title())); ?>
                         <?php else : ?>
                            <img src="<?php echo get_template_directory_uri(); ?>/public/img/team/default-avatar.png" class="img-fluid" alt="<?php the_title(); ?>">
                         <?php endif; ?>
@@ -495,37 +410,66 @@ get_header(); ?>
 
 
 
+<!-- Sponsors Carousel Start -->
 <section class="">
    <div class="container">
       <div class="sponsor-carousel">
          <div class="sponsor-track">
-            <!-- Lặp lại các logo để tạo hiệu ứng nối đuôi -->
-            <img src="public/img/logo/l1.jpg" alt="Nhà Tài Trợ 1">
-            <img src="public/img/logo/l2.jpg" alt="Nhà Tài Trợ 2">
-            <img src="public/img/logo/l3.jpg" alt="Nhà Tài Trợ 3">
-            <img src="public/img/logo/l4.jpg" alt="Nhà Tài Trợ 4">
-            <img src="public/img/logo/l1.jpg" alt="Nhà Tài Trợ 1">
-            <img src="public/img/logo/l2.jpg" alt="Nhà Tài Trợ 2">
-            <img src="public/img/logo/l3.jpg" alt="Nhà Tài Trợ 3">
-            <img src="public/img/logo/l4.jpg" alt="Nhà Tài Trợ 4">
+            <?php
+            // Query all sponsors ordered by menu_order
+            $sponsor_args = array(
+               'post_type' => 'sponsor',
+               'posts_per_page' => -1,
+               'orderby' => 'menu_order',
+               'order' => 'ASC',
+               'post_status' => 'publish'
+            );
+
+            $sponsor_query = new WP_Query($sponsor_args);
+
+            if ($sponsor_query->have_posts()) :
+               // Loop through sponsors twice for seamless carousel effect
+               for ($i = 0; $i < 2; $i++) :
+                  while ($sponsor_query->have_posts()) : $sponsor_query->the_post();
+                     $sponsor_url = get_post_meta(get_the_ID(), '_sponsor_url', true);
+                     $new_tab = get_post_meta(get_the_ID(), '_sponsor_new_tab', true);
+                     $target = $new_tab ? ' target="_blank" rel="noopener noreferrer"' : '';
+
+                     if ($sponsor_url) :
+                        ?>
+                        <a href="<?php echo esc_url($sponsor_url); ?>"<?php echo $target; ?>>
+                           <?php if (has_post_thumbnail()) : ?>
+                              <?php the_post_thumbnail('thumbnail', array('alt' => get_the_title())); ?>
+                           <?php endif; ?>
+                        </a>
+                        <?php
+                     else :
+                        if (has_post_thumbnail()) :
+                           the_post_thumbnail('thumbnail', array('alt' => get_the_title()));
+                        endif;
+                     endif;
+                  endwhile;
+
+                  // Reset query for second loop
+                  if ($i == 0) $sponsor_query->rewind_posts();
+               endfor;
+
+               wp_reset_postdata();
+            endif;
+            ?>
          </div>
       </div>
    </div>
 </section>
+<!-- Sponsors Carousel End -->
 
 
 
 
-   <div class="container-fluid bg-primary">
+<div class="container-fluid bg-primary">
    <div class="py-5">
       <div class="col-md-12 text-center">
-         <h3 class="stick text-white">"TVL
-            Legal
-            System
-            - Đồng hành
-            pháp lý, kiến
-            tạo niềm
-            tin!"</h3>
+         <h3 class="stick text-white">"TVL Legal System - Đồng hành pháp lý, kiến tạo niềmtin!"</h3>
       </div>
    </div>
 </div>

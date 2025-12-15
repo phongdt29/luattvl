@@ -47,12 +47,12 @@ class WP_Bootstrap_Navwalker extends Walker_Nav_Menu {
 
     function start_lvl(&$output, $depth = 0, $args = array()) {
         $indent = str_repeat("\t", $depth);
-        $output .= "\n$indent<div class=\"dropdown-menu m-0\">\n";
+        $output .= "\n$indent<ul class=\"dropdown-menu\">\n";
     }
 
     function end_lvl(&$output, $depth = 0, $args = array()) {
         $indent = str_repeat("\t", $depth);
-        $output .= "$indent</div>\n";
+        $output .= "$indent</ul>\n";
     }
 
     function start_el(&$output, $item, $depth = 0, $args = array(), $id = 0) {
@@ -67,9 +67,7 @@ class WP_Bootstrap_Navwalker extends Walker_Nav_Menu {
 
         $class_names = join(' ', apply_filters('nav_menu_css_class', array_filter($classes), $item, $args));
 
-        if ($depth === 0) {
-            $output .= $indent . '<div class="' . esc_attr($class_names) . '">';
-        }
+        $output .= $indent . '<li class="' . esc_attr($class_names) . '">';
 
         $atts = array();
         $atts['title'] = !empty($item->attr_title) ? $item->attr_title : '';
@@ -109,9 +107,7 @@ class WP_Bootstrap_Navwalker extends Walker_Nav_Menu {
     }
 
     function end_el(&$output, $item, $depth = 0, $args = array()) {
-        if ($depth === 0) {
-            $output .= "</div>\n";
-        }
+        $output .= "</li>\n";
     }
 }
 
@@ -357,6 +353,456 @@ function tvl_duplicate_admin_notice() {
 }
 add_action('admin_notices', 'tvl_duplicate_admin_notice');
 
+// Register Sponsors Custom Post Type
+function tvl_register_sponsor_post_type() {
+    $labels = array(
+        'name' => 'Nhà Tài Trợ',
+        'singular_name' => 'Nhà Tài Trợ',
+        'menu_name' => 'Nhà Tài Trợ',
+        'add_new' => 'Thêm Mới',
+        'add_new_item' => 'Thêm Nhà Tài Trợ Mới',
+        'edit_item' => 'Sửa Nhà Tài Trợ',
+        'new_item' => 'Nhà Tài Trợ Mới',
+        'view_item' => 'Xem Nhà Tài Trợ',
+        'search_items' => 'Tìm Nhà Tài Trợ',
+        'not_found' => 'Không tìm thấy nhà tài trợ',
+        'not_found_in_trash' => 'Không có nhà tài trợ trong thùng rác'
+    );
+
+    $args = array(
+        'labels' => $labels,
+        'public' => true,
+        'has_archive' => false,
+        'publicly_queryable' => false,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'show_in_nav_menus' => false,
+        'menu_icon' => 'dashicons-heart',
+        'supports' => array('title', 'thumbnail'),
+        'menu_position' => 6,
+    );
+
+    register_post_type('sponsor', $args);
+}
+add_action('init', 'tvl_register_sponsor_post_type');
+
+// Add Meta Boxes for Sponsor Link
+function tvl_sponsor_meta_boxes() {
+    add_meta_box(
+        'sponsor_link',
+        'Thông Tin Nhà Tài Trợ',
+        'tvl_sponsor_link_callback',
+        'sponsor',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'tvl_sponsor_meta_boxes');
+
+function tvl_sponsor_link_callback($post) {
+    wp_nonce_field('tvl_save_sponsor_meta', 'tvl_sponsor_meta_nonce');
+
+    $sponsor_url = get_post_meta($post->ID, '_sponsor_url', true);
+    $open_new_tab = get_post_meta($post->ID, '_sponsor_new_tab', true);
+
+    ?>
+    <table class="form-table">
+        <tr>
+            <th><label for="sponsor_url">Website URL</label></th>
+            <td>
+                <input type="url" id="sponsor_url" name="sponsor_url" value="<?php echo esc_url($sponsor_url); ?>" class="regular-text" placeholder="https://example.com">
+                <p class="description">Nhập link website của nhà tài trợ (không bắt buộc)</p>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="sponsor_new_tab">Mở trong tab mới</label></th>
+            <td>
+                <label>
+                    <input type="checkbox" id="sponsor_new_tab" name="sponsor_new_tab" value="1" <?php checked($open_new_tab, '1'); ?>>
+                    Mở link trong tab mới
+                </label>
+            </td>
+        </tr>
+    </table>
+    <?php
+}
+
+function tvl_save_sponsor_meta($post_id) {
+    if (!isset($_POST['tvl_sponsor_meta_nonce'])) {
+        return;
+    }
+
+    if (!wp_verify_nonce($_POST['tvl_sponsor_meta_nonce'], 'tvl_save_sponsor_meta')) {
+        return;
+    }
+
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+
+    if (isset($_POST['sponsor_url'])) {
+        update_post_meta($post_id, '_sponsor_url', esc_url_raw($_POST['sponsor_url']));
+    } else {
+        delete_post_meta($post_id, '_sponsor_url');
+    }
+
+    if (isset($_POST['sponsor_new_tab'])) {
+        update_post_meta($post_id, '_sponsor_new_tab', '1');
+    } else {
+        delete_post_meta($post_id, '_sponsor_new_tab');
+    }
+}
+add_action('save_post_sponsor', 'tvl_save_sponsor_meta');
+
+// Enable menu_order support for sponsors
+function tvl_sponsor_enable_menu_order() {
+    add_post_type_support('sponsor', 'page-attributes');
+}
+add_action('init', 'tvl_sponsor_enable_menu_order');
+
+// Add Menu Order column to Sponsors admin
+function tvl_sponsor_columns($columns) {
+    $new_columns = array();
+    $new_columns['cb'] = $columns['cb'];
+    $new_columns['thumbnail'] = 'Logo';
+    $new_columns['title'] = 'Tên Nhà Tài Trợ';
+    $new_columns['sponsor_url'] = 'Website';
+    $new_columns['menu_order'] = 'Thứ Tự';
+    $new_columns['date'] = $columns['date'];
+    return $new_columns;
+}
+add_filter('manage_sponsor_posts_columns', 'tvl_sponsor_columns');
+
+function tvl_sponsor_column_content($column_name, $post_id) {
+    if ($column_name == 'menu_order') {
+        $order = get_post_field('menu_order', $post_id);
+        echo $order;
+    }
+
+    if ($column_name == 'thumbnail') {
+        $thumbnail = get_the_post_thumbnail($post_id, array(60, 60));
+        echo $thumbnail ? $thumbnail : '—';
+    }
+
+    if ($column_name == 'sponsor_url') {
+        $url = get_post_meta($post_id, '_sponsor_url', true);
+        if ($url) {
+            echo '<a href="' . esc_url($url) . '" target="_blank">' . esc_html($url) . '</a>';
+        } else {
+            echo '—';
+        }
+    }
+}
+add_action('manage_sponsor_posts_custom_column', 'tvl_sponsor_column_content', 10, 2);
+
+// Make sponsors sortable
+function tvl_sponsor_sortable_columns($columns) {
+    $columns['menu_order'] = 'menu_order';
+    return $columns;
+}
+add_filter('manage_edit-sponsor_sortable_columns', 'tvl_sponsor_sortable_columns');
+
+// Add Duplicate link to Sponsor row actions
+function tvl_duplicate_sponsor_link($actions, $post) {
+    if ($post->post_type == 'sponsor') {
+        if (current_user_can('edit_posts')) {
+            $actions['duplicate'] = '<a href="' . wp_nonce_url(admin_url('admin.php?action=tvl_duplicate_sponsor&post=' . $post->ID), 'tvl_duplicate_sponsor_' . $post->ID, 'tvl_duplicate_nonce') . '" title="Sao chép nhà tài trợ này" rel="permalink">Sao chép</a>';
+        }
+    }
+    return $actions;
+}
+add_filter('post_row_actions', 'tvl_duplicate_sponsor_link', 10, 2);
+
+// Handle Sponsor Duplication
+function tvl_duplicate_sponsor() {
+    if (empty($_GET['post'])) {
+        wp_die('Không tìm thấy nhà tài trợ để sao chép!');
+    }
+
+    $post_id = absint($_GET['post']);
+
+    if (!isset($_GET['tvl_duplicate_nonce']) || !wp_verify_nonce($_GET['tvl_duplicate_nonce'], 'tvl_duplicate_sponsor_' . $post_id)) {
+        wp_die('Security check failed');
+    }
+
+    if (!current_user_can('edit_posts')) {
+        wp_die('Bạn không có quyền thực hiện hành động này');
+    }
+
+    $post = get_post($post_id);
+
+    if (!$post || $post->post_type != 'sponsor') {
+        wp_die('Nhà tài trợ không tồn tại hoặc đã bị xóa!');
+    }
+
+    $new_post = array(
+        'post_title' => $post->post_title . ' (Copy)',
+        'post_status' => 'draft',
+        'post_type' => 'sponsor',
+        'post_author' => get_current_user_id(),
+        'menu_order' => $post->menu_order
+    );
+
+    $new_post_id = wp_insert_post($new_post);
+
+    if (is_wp_error($new_post_id)) {
+        wp_die('Lỗi khi tạo bản sao: ' . $new_post_id->get_error_message());
+    }
+
+    // Duplicate meta
+    $sponsor_url = get_post_meta($post_id, '_sponsor_url', true);
+    if ($sponsor_url) {
+        update_post_meta($new_post_id, '_sponsor_url', $sponsor_url);
+    }
+
+    $new_tab = get_post_meta($post_id, '_sponsor_new_tab', true);
+    if ($new_tab) {
+        update_post_meta($new_post_id, '_sponsor_new_tab', $new_tab);
+    }
+
+    // Duplicate featured image
+    $thumbnail_id = get_post_thumbnail_id($post_id);
+    if ($thumbnail_id) {
+        set_post_thumbnail($new_post_id, $thumbnail_id);
+    }
+
+    wp_redirect(admin_url('post.php?action=edit&post=' . $new_post_id));
+    exit;
+}
+add_action('admin_action_tvl_duplicate_sponsor', 'tvl_duplicate_sponsor');
+
+// Register Videos Custom Post Type
+function tvl_register_video_post_type() {
+    $labels = array(
+        'name' => 'Video',
+        'singular_name' => 'Video',
+        'menu_name' => 'Video',
+        'add_new' => 'Thêm Mới',
+        'add_new_item' => 'Thêm Video Mới',
+        'edit_item' => 'Sửa Video',
+        'new_item' => 'Video Mới',
+        'view_item' => 'Xem Video',
+        'search_items' => 'Tìm Video',
+        'not_found' => 'Không tìm thấy video',
+        'not_found_in_trash' => 'Không có video trong thùng rác'
+    );
+
+    $args = array(
+        'labels' => $labels,
+        'public' => true,
+        'has_archive' => true,
+        'publicly_queryable' => true,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'show_in_nav_menus' => true,
+        'menu_icon' => 'dashicons-video-alt3',
+        'supports' => array('title', 'thumbnail', 'editor', 'excerpt'),
+        'rewrite' => array('slug' => 'video'),
+        'menu_position' => 7,
+    );
+
+    register_post_type('video', $args);
+}
+add_action('init', 'tvl_register_video_post_type');
+
+// Add Meta Boxes for Video
+function tvl_video_meta_boxes() {
+    add_meta_box(
+        'video_info',
+        'Thông Tin Video',
+        'tvl_video_info_callback',
+        'video',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'tvl_video_meta_boxes');
+
+function tvl_video_info_callback($post) {
+    wp_nonce_field('tvl_save_video_meta', 'tvl_video_meta_nonce');
+
+    $video_url = get_post_meta($post->ID, '_video_url', true);
+    $external_thumbnail = get_post_meta($post->ID, '_external_thumbnail', true);
+
+    ?>
+    <table class="form-table">
+        <tr>
+            <th><label for="video_url">Link Video</label></th>
+            <td>
+                <input type="url" id="video_url" name="video_url" value="<?php echo esc_url($video_url); ?>" class="large-text" placeholder="https://example.com/video.html">
+                <p class="description">Nhập link đến trang video (bắt buộc)</p>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="external_thumbnail">Link Ảnh Thumbnail (Tùy chọn)</label></th>
+            <td>
+                <input type="url" id="external_thumbnail" name="external_thumbnail" value="<?php echo esc_url($external_thumbnail); ?>" class="large-text" placeholder="https://example.com/image.jpg">
+                <p class="description">Nhập link ảnh thumbnail từ nguồn bên ngoài (nếu không có thì dùng Featured Image)</p>
+            </td>
+        </tr>
+    </table>
+    <?php
+}
+
+function tvl_save_video_meta($post_id) {
+    if (!isset($_POST['tvl_video_meta_nonce'])) {
+        return;
+    }
+
+    if (!wp_verify_nonce($_POST['tvl_video_meta_nonce'], 'tvl_save_video_meta')) {
+        return;
+    }
+
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+
+    if (isset($_POST['video_url'])) {
+        update_post_meta($post_id, '_video_url', esc_url_raw($_POST['video_url']));
+    } else {
+        delete_post_meta($post_id, '_video_url');
+    }
+
+    if (isset($_POST['external_thumbnail']) && !empty($_POST['external_thumbnail'])) {
+        update_post_meta($post_id, '_external_thumbnail', esc_url_raw($_POST['external_thumbnail']));
+    } else {
+        delete_post_meta($post_id, '_external_thumbnail');
+    }
+}
+add_action('save_post_video', 'tvl_save_video_meta');
+
+// Enable menu_order support for videos
+function tvl_video_enable_menu_order() {
+    add_post_type_support('video', 'page-attributes');
+}
+add_action('init', 'tvl_video_enable_menu_order');
+
+// Add custom columns to Videos admin
+function tvl_video_columns($columns) {
+    $new_columns = array();
+    $new_columns['cb'] = $columns['cb'];
+    $new_columns['thumbnail'] = 'Thumbnail';
+    $new_columns['title'] = 'Tiêu Đề';
+    $new_columns['video_url'] = 'Link Video';
+    $new_columns['menu_order'] = 'Thứ Tự';
+    $new_columns['date'] = $columns['date'];
+    return $new_columns;
+}
+add_filter('manage_video_posts_columns', 'tvl_video_columns');
+
+function tvl_video_column_content($column_name, $post_id) {
+    if ($column_name == 'menu_order') {
+        $order = get_post_field('menu_order', $post_id);
+        echo $order;
+    }
+
+    if ($column_name == 'thumbnail') {
+        $external_thumb = get_post_meta($post_id, '_external_thumbnail', true);
+        if ($external_thumb) {
+            echo '<img src="' . esc_url($external_thumb) . '" style="width:60px;height:60px;object-fit:cover;">';
+        } else {
+            $thumbnail = get_the_post_thumbnail($post_id, array(60, 60));
+            echo $thumbnail ? $thumbnail : '—';
+        }
+    }
+
+    if ($column_name == 'video_url') {
+        $url = get_post_meta($post_id, '_video_url', true);
+        if ($url) {
+            echo '<a href="' . esc_url($url) . '" target="_blank">Xem video</a>';
+        } else {
+            echo '—';
+        }
+    }
+}
+add_action('manage_video_posts_custom_column', 'tvl_video_column_content', 10, 2);
+
+// Make videos sortable
+function tvl_video_sortable_columns($columns) {
+    $columns['menu_order'] = 'menu_order';
+    return $columns;
+}
+add_filter('manage_edit-video_sortable_columns', 'tvl_video_sortable_columns');
+
+// Add Duplicate link to Video row actions
+function tvl_duplicate_video_link($actions, $post) {
+    if ($post->post_type == 'video') {
+        if (current_user_can('edit_posts')) {
+            $actions['duplicate'] = '<a href="' . wp_nonce_url(admin_url('admin.php?action=tvl_duplicate_video&post=' . $post->ID), 'tvl_duplicate_video_' . $post->ID, 'tvl_duplicate_nonce') . '" title="Sao chép video này" rel="permalink">Sao chép</a>';
+        }
+    }
+    return $actions;
+}
+add_filter('post_row_actions', 'tvl_duplicate_video_link', 10, 2);
+
+// Handle Video Duplication
+function tvl_duplicate_video() {
+    if (empty($_GET['post'])) {
+        wp_die('Không tìm thấy video để sao chép!');
+    }
+
+    $post_id = absint($_GET['post']);
+
+    if (!isset($_GET['tvl_duplicate_nonce']) || !wp_verify_nonce($_GET['tvl_duplicate_nonce'], 'tvl_duplicate_video_' . $post_id)) {
+        wp_die('Security check failed');
+    }
+
+    if (!current_user_can('edit_posts')) {
+        wp_die('Bạn không có quyền thực hiện hành động này');
+    }
+
+    $post = get_post($post_id);
+
+    if (!$post || $post->post_type != 'video') {
+        wp_die('Video không tồn tại hoặc đã bị xóa!');
+    }
+
+    $new_post = array(
+        'post_title' => $post->post_title . ' (Copy)',
+        'post_content' => $post->post_content,
+        'post_excerpt' => $post->post_excerpt,
+        'post_status' => 'draft',
+        'post_type' => 'video',
+        'post_author' => get_current_user_id(),
+        'menu_order' => $post->menu_order
+    );
+
+    $new_post_id = wp_insert_post($new_post);
+
+    if (is_wp_error($new_post_id)) {
+        wp_die('Lỗi khi tạo bản sao: ' . $new_post_id->get_error_message());
+    }
+
+    // Duplicate meta
+    $video_url = get_post_meta($post_id, '_video_url', true);
+    if ($video_url) {
+        update_post_meta($new_post_id, '_video_url', $video_url);
+    }
+
+    $external_thumb = get_post_meta($post_id, '_external_thumbnail', true);
+    if ($external_thumb) {
+        update_post_meta($new_post_id, '_external_thumbnail', $external_thumb);
+    }
+
+    // Duplicate featured image
+    $thumbnail_id = get_post_thumbnail_id($post_id);
+    if ($thumbnail_id) {
+        set_post_thumbnail($new_post_id, $thumbnail_id);
+    }
+
+    wp_redirect(admin_url('post.php?action=edit&post=' . $new_post_id));
+    exit;
+}
+add_action('admin_action_tvl_duplicate_video', 'tvl_duplicate_video');
+
 // function tvl_enqueue_assets() {
 //     // IMPORTANT: copy your original 'public' folder into the theme root (tvl-legal/public) so these files exist
 //     wp_enqueue_style('bootstrap', get_template_directory_uri() . '/public/css/bootstrap.min.css');
@@ -368,3 +814,200 @@ add_action('admin_notices', 'tvl_duplicate_admin_notice');
 //     wp_enqueue_script('tvl-main', get_template_directory_uri() . '/public/js/main.js', array('jquery'), null, true);
 // }
 // add_action('wp_enqueue_scripts', 'tvl_enqueue_assets');
+
+// Register Practice Area Taxonomy
+function tvl_register_practice_area_taxonomy() {
+    $labels = array(
+        'name' => 'Lĩnh Vực Hoạt Động',
+        'singular_name' => 'Lĩnh Vực',
+        'menu_name' => 'Lĩnh Vực',
+        'all_items' => 'Tất Cả Lĩnh Vực',
+        'edit_item' => 'Sửa Lĩnh Vực',
+        'view_item' => 'Xem Lĩnh Vực',
+        'update_item' => 'Cập Nhật Lĩnh Vực',
+        'add_new_item' => 'Thêm Lĩnh Vực Mới',
+        'new_item_name' => 'Tên Lĩnh Vực Mới',
+        'search_items' => 'Tìm Lĩnh Vực',
+        'popular_items' => 'Lĩnh Vực Phổ Biến',
+        'not_found' => 'Không tìm thấy lĩnh vực'
+    );
+
+    $args = array(
+        'labels' => $labels,
+        'hierarchical' => true,
+        'public' => true,
+        'show_ui' => true,
+        'show_admin_column' => true,
+        'show_in_nav_menus' => true,
+        'show_tagcloud' => false,
+        'rewrite' => array('slug' => 'linh-vuc'),
+    );
+
+    register_taxonomy('practice_area', array('post'), $args);
+}
+add_action('init', 'tvl_register_practice_area_taxonomy');
+
+// Add image field to Practice Area taxonomy
+function tvl_practice_area_add_image_field() {
+    ?>
+    <div class="form-field">
+        <label for="practice_area_image">Hình Ảnh</label>
+        <input type="hidden" id="practice_area_image" name="practice_area_image" value="">
+        <div id="practice_area_image_preview" style="margin-bottom: 10px;"></div>
+        <button type="button" class="button" id="upload_practice_area_image">Chọn Hình Ảnh</button>
+        <button type="button" class="button" id="remove_practice_area_image" style="display:none;">Xóa Hình Ảnh</button>
+        <p class="description">Upload hình ảnh đại diện cho lĩnh vực hoạt động</p>
+    </div>
+
+    <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        var mediaUploader;
+
+        $('#upload_practice_area_image').on('click', function(e) {
+            e.preventDefault();
+
+            if (mediaUploader) {
+                mediaUploader.open();
+                return;
+            }
+
+            mediaUploader = wp.media({
+                title: 'Chọn Hình Ảnh',
+                button: {
+                    text: 'Sử Dụng Hình Này'
+                },
+                multiple: false
+            });
+
+            mediaUploader.on('select', function() {
+                var attachment = mediaUploader.state().get('selection').first().toJSON();
+                $('#practice_area_image').val(attachment.id);
+                $('#practice_area_image_preview').html('<img src="' + attachment.url + '" style="max-width:200px;height:auto;">');
+                $('#remove_practice_area_image').show();
+            });
+
+            mediaUploader.open();
+        });
+
+        $('#remove_practice_area_image').on('click', function(e) {
+            e.preventDefault();
+            $('#practice_area_image').val('');
+            $('#practice_area_image_preview').html('');
+            $(this).hide();
+        });
+    });
+    </script>
+    <?php
+}
+add_action('practice_area_add_form_fields', 'tvl_practice_area_add_image_field');
+
+// Edit image field for Practice Area taxonomy
+function tvl_practice_area_edit_image_field($term) {
+    $image_id = get_term_meta($term->term_id, 'practice_area_image', true);
+    $image_url = $image_id ? wp_get_attachment_url($image_id) : '';
+    ?>
+    <tr class="form-field">
+        <th scope="row"><label for="practice_area_image">Hình Ảnh</label></th>
+        <td>
+            <input type="hidden" id="practice_area_image" name="practice_area_image" value="<?php echo esc_attr($image_id); ?>">
+            <div id="practice_area_image_preview" style="margin-bottom: 10px;">
+                <?php if ($image_url) : ?>
+                    <img src="<?php echo esc_url($image_url); ?>" style="max-width:200px;height:auto;">
+                <?php endif; ?>
+            </div>
+            <button type="button" class="button" id="upload_practice_area_image">Chọn Hình Ảnh</button>
+            <button type="button" class="button" id="remove_practice_area_image" style="<?php echo $image_url ? '' : 'display:none;'; ?>">Xóa Hình Ảnh</button>
+            <p class="description">Upload hình ảnh đại diện cho lĩnh vực hoạt động</p>
+
+            <script type="text/javascript">
+            jQuery(document).ready(function($) {
+                var mediaUploader;
+
+                $('#upload_practice_area_image').on('click', function(e) {
+                    e.preventDefault();
+
+                    if (mediaUploader) {
+                        mediaUploader.open();
+                        return;
+                    }
+
+                    mediaUploader = wp.media({
+                        title: 'Chọn Hình Ảnh',
+                        button: {
+                            text: 'Sử Dụng Hình Này'
+                        },
+                        multiple: false
+                    });
+
+                    mediaUploader.on('select', function() {
+                        var attachment = mediaUploader.state().get('selection').first().toJSON();
+                        $('#practice_area_image').val(attachment.id);
+                        $('#practice_area_image_preview').html('<img src="' + attachment.url + '" style="max-width:200px;height:auto;">');
+                        $('#remove_practice_area_image').show();
+                    });
+
+                    mediaUploader.open();
+                });
+
+                $('#remove_practice_area_image').on('click', function(e) {
+                    e.preventDefault();
+                    $('#practice_area_image').val('');
+                    $('#practice_area_image_preview').html('');
+                    $(this).hide();
+                });
+            });
+            </script>
+        </td>
+    </tr>
+    <?php
+}
+add_action('practice_area_edit_form_fields', 'tvl_practice_area_edit_image_field');
+
+// Save Practice Area image
+function tvl_save_practice_area_image($term_id) {
+    if (isset($_POST['practice_area_image'])) {
+        update_term_meta($term_id, 'practice_area_image', sanitize_text_field($_POST['practice_area_image']));
+    }
+}
+add_action('created_practice_area', 'tvl_save_practice_area_image');
+add_action('edited_practice_area', 'tvl_save_practice_area_image');
+
+// Add image column to Practice Area admin list
+function tvl_practice_area_columns($columns) {
+    $new_columns = array();
+    $new_columns['cb'] = $columns['cb'];
+    $new_columns['image'] = 'Hình Ảnh';
+    $new_columns['name'] = $columns['name'];
+    $new_columns['description'] = $columns['description'];
+    $new_columns['slug'] = $columns['slug'];
+    $new_columns['posts'] = $columns['posts'];
+    return $new_columns;
+}
+add_filter('manage_edit-practice_area_columns', 'tvl_practice_area_columns');
+
+// Display image in Practice Area admin column
+function tvl_practice_area_column_content($content, $column_name, $term_id) {
+    if ($column_name == 'image') {
+        $image_id = get_term_meta($term_id, 'practice_area_image', true);
+        if ($image_id) {
+            $image = wp_get_attachment_image($image_id, array(50, 50));
+            $content = $image;
+        } else {
+            $content = '—';
+        }
+    }
+    return $content;
+}
+add_filter('manage_practice_area_custom_column', 'tvl_practice_area_column_content', 10, 3);
+
+// Enqueue media uploader scripts for Practice Area taxonomy
+function tvl_enqueue_practice_area_scripts($hook) {
+    // Load on taxonomy edit pages
+    if ($hook === 'edit-tags.php' || $hook === 'term.php') {
+        if (isset($_GET['taxonomy']) && $_GET['taxonomy'] === 'practice_area') {
+            wp_enqueue_media();
+            wp_enqueue_script('jquery');
+        }
+    }
+}
+add_action('admin_enqueue_scripts', 'tvl_enqueue_practice_area_scripts');
