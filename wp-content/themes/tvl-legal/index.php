@@ -236,47 +236,55 @@ get_header(); ?>
       <!-- Phần 9 cột cho bài viết -->
       <div class="col-lg-9">
          <div class="row">
-            <!-- Bài viết 1 -->
-                        <div class="col-md-4">
-               <div class="card mb-3">
-                  <img src="public/uploads/chu-de-he-thong-luat-tvl-%e2%80%93-dau-an-cua-uy-tin-va-chuyen-nghiep-trong-linh-vuc-phap-ly-6221.jpg" class="card-img-top" alt="Image 1">
-                  <div class="card-body">
-                     <h5 class="card-title">CHỦ ĐỀ: HỆ THỐNG LUẬT TVL – DẤU ẤN CỦA UY TÍN VÀ CHUYÊN NGHIỆP TRONG LĨNH VỰC PHÁP LÝ</h5>
-                     <p class="card-text"><i class="bi bi-calendar"> </i> 2025-10-29
-                     </p>
-                     <p class="card-text">Trong bối cảnh nền kinh tế phát triển mạnh mẽ, nhu cầu được bảo vệ quyền lợi hợp pháp và tìm kiếm các giải pháp pháp lý toàn diện ngày càng tăng cao. Giữa thị trường dịch vụ pháp lý cạnh tranh, hệ thống Luật TVL – do Luật sư Trần Vân Linh sáng lập – đã khẳng định vị thế của mình bằng chất lượng chuyên môn, uy tín nghề nghiệp và tinh thần phụng sự khách hàng.</p>
-                     <a href="blog/chu-de-he-thong-luat-tvl-%e2%80%93-dau-an-cua-uy-tin-va-chuyen-nghiep-trong-linh-vuc-phap-ly.html" class="btn btn-primary">Đọc thêm</a>
-                  </div>
-               </div>
-            </div>
-                        <div class="col-md-4">
-               <div class="card mb-3">
-                  <img src="public/uploads/thong-bao-chieu-sinh-khoa-hoc-trong-tai-thuong-mai-ket-hop-truc-tuyen-va-truc-tiep-8766.jpg" class="card-img-top" alt="Image 1">
-                  <div class="card-body">
-                     <h5 class="card-title">THÔNG BÁO CHIÊU SINH KHÓA HỌC TRỌNG TÀI THƯƠNG MẠI (KẾT HỢP TRỰC TUYẾN VÀ TRỰC TIẾP)</h5>
-                     <p class="card-text"><i class="bi bi-calendar"> </i> 2025-10-13
-                     </p>
-                     <p class="card-text">GIẢI QUYẾT TRANH CHẤP HIỆU QUẢ - NẮM VỮNG PHÁP LÝ KINH DOANH</p>
-                     <a href="blog/thong-bao-chieu-sinh-khoa-hoc-trong-tai-thuong-mai-ket-hop-truc-tuyen-va-truc-tiep.html" class="btn btn-primary">Đọc thêm</a>
-                  </div>
-               </div>
-            </div>
-                        <div class="col-md-4">
-               <div class="card mb-3">
-                  <img src="public/uploads/vien-khoa-hoc-phap-ly-trong-tai-chieu-sinh-khoa-boi-duong-kien-thuc-phap-luat-ve-trong-tai-thuong-mai-khoa-52025--3280.jpg" class="card-img-top" alt="Image 1">
-                  <div class="card-body">
-                     <h5 class="card-title">VIỆN KHOA HỌC PHÁP LÝ TRỌNG TÀI💥💥Chiêu sinh khóa bồi dưỡng kiến thức pháp luật về Trọng tài thương mại khóa 5/2025 💥💥</h5>
-                     <p class="card-text"><i class="bi bi-calendar"> </i> 2025-06-25
-                     </p>
-                     <p class="card-text">VIỆN KHOA HỌC PHÁP LÝ TRỌNG TÀI💥💥Chiêu sinh khóa bồi dưỡng kiến thức pháp luật về Trọng tài thương mại khóa 5/2025 💥💥</p>
-                     <a href="blog/vien-khoa-hoc-phap-ly-trong-tai-chieu-sinh-khoa-boi-duong-kien-thuc-phap-luat-ve-trong-tai-thuong-mai-khoa-52025-.html" class="btn btn-primary">Đọc thêm</a>
-                  </div>
-               </div>
-            </div>
+            <?php
+            // Query the latest 3 posts
+            $args = array(
+               'post_type' => 'post',
+               'posts_per_page' => 3,
+               'orderby' => 'date',
+               'order' => 'DESC'
+            );
+            $latest_posts = new WP_Query($args);
+
+            if ($latest_posts->have_posts()) :
+               while ($latest_posts->have_posts()) : $latest_posts->the_post();
+            ?>
+                  <div class="col-md-4">
+                     <div class="card mb-3">
+                        <?php if (has_post_thumbnail()) : ?>
+                           <a href="<?php the_permalink(); ?>">
+                              <?php the_post_thumbnail('medium', array('class' => 'card-img-top')); ?>
+                           </a>
+                        <?php else : ?>
+                           <img src="<?php echo get_template_directory_uri(); ?>/public/img/default-post.jpg" class="card-img-top" alt="<?php the_title(); ?>">
+                        <?php endif; ?>
+                        <div class="card-body">
+                           <h5 class="card-title">
+                              <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                           </h5>
+                           <p class="card-text">
+                              <i class="bi bi-calendar"></i> <?php echo get_the_date('Y-m-d'); ?>
+                           </p>
+                           <p class="card-text">
+                              <?php echo wp_trim_words(get_the_excerpt(), 30, '...'); ?>
+                           </p>
+                           <a href="<?php the_permalink(); ?>" class="btn btn-primary">Đọc thêm</a>
+                        </div>
                      </div>
+                  </div>
+            <?php
+               endwhile;
+               wp_reset_postdata();
+            else :
+            ?>
+               <div class="col-md-12">
+                  <p class="text-center">Chưa có bài viết nào.</p>
+               </div>
+            <?php endif; ?>
+         </div>
          <div class="row py-3 text-center pb-5">
             <div class="col-md-12">
-               <a href="post.html" class="btn btn-primary py-2 px-5">Tất cả bài viết</a>
+               <a href="<?php echo get_permalink(get_option('page_for_posts')); ?>" class="btn btn-primary py-2 px-5">Tất cả bài viết</a>
             </div>
          </div>
       </div>
