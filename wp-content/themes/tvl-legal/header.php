@@ -47,36 +47,17 @@
       <i class="fa fa-bars"></i>
    </button>
    <div class="collapse navbar-collapse" id="navbarCollapse">
-      <div class="navbar-nav ms-auto py-0">
-         <a href="index.html" class="nav-item nav-link">Trang chủ</a>
-         <div class="nav-item dropdown">
-            <a class="nav-link" data-bs-toggle="dropdown">Giới thiệu</a>
-            <div class="dropdown-menu m-0">
-               <a href="about_1.html" class="dropdown-item">TVL Legal System</a>
-               <a href="about_2.html" class="dropdown-item">Văn phòng luật sư Trần Vân Linh</a>
-               <a href="about_3.html" class="dropdown-item">Công ty Luật TNHH TVL</a>
-            </div>
-         </div>
-         <div class="nav-item dropdown">
-            <a class="nav-link" data-bs-toggle="dropdown">Lĩnh vực</a>
-            <div class="dropdown-menu m-0">
-               <a href="cat_1.html" class="dropdown-item">Luật sư Tranh tụng</a>
-               <a href="cat_2.html" class="dropdown-item">Tố tụng tại Trọng tài</a>
-               <a href="cat_3.html" class="dropdown-item">Đầu tư & Doanh nghiệp</a> <a
-                  href="cat_4.html" class="dropdown-item">Sở hữu trí tuệ</a>
-               <a href="cat_5.html" class="dropdown-item">Lao Động</a>
-               <a href="cat_6.html" class="dropdown-item">Kế Toán - Thuế</a>
-               <a href="cat_7.html" class="dropdown-item">Bất động sản & Xây dựng</a>
-               <a href="cat_8.html" class="dropdown-item">Mua bán & Sáp nhập (M&A )</a>
-               <a href="cat_9.html" class="dropdown-item">Tài chính - Ngân hàng</a>
-               <a href="cat_10.html" class="dropdown-item">Hôn nhân và gia đình - Thừa kế</a>
-            </div>
-         </div>
-         
-         
-         <a href="team.html" class="nav-item nav-link">Đội ngũ</a>
-         <a href="contact.html" class="nav-item nav-link">Liên hệ</a>
-      </div>
+      <?php
+      wp_nav_menu(array(
+         'theme_location' => 'main-menu',
+         'container' => 'div',
+         'container_class' => 'navbar-nav ms-auto py-0',
+         'menu_class' => '',
+         'fallback_cb' => false,
+         'depth' => 2,
+         'walker' => new WP_Bootstrap_Navwalker()
+      ));
+      ?>
    </div>
 </nav>
 </header>
