@@ -427,126 +427,69 @@ get_header(); ?>
          <h2>THÀNH VIÊN</h2>
          <h1 class="display-5 mb-4" style="color: #0275ff;">TVL Legal System</h1>
       </div>
-      <div class="row g-3 justify-content-center pb-3">
-         <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp pt-3" data-wow-delay="0.4s">
-            <a href="team_1.html">
-               <div class="team-item">
-                  <div class="team-img">
-                     <img src="public/img/team/avt_1.jpg" class="img-fluid" alt="">
-                  </div>
-                  <div class="team-title">
-                     <h5 class="mb-2">Ls. Trần Vân Linh</h5>
-                     <ul class="list-unstyled">
-                        <li>Founder - TVL Legal System</li>
-                        <li>Trưởng Văn phòng</li>
-                        <li>VPLS Trần Vân Linh</li>
-                     </ul>
-                  </div>
-               </div>
-            </a>
-         </div>
-         <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp pt-3" data-wow-delay="0.4s">
-            <a href="team_2.html">
-               <div class="team-item">
-                  <div class="team-img">
-                     <img src="public/img/team/avt_2.png" class="img-fluid" alt="">
-                  </div>
-                  <div class="team-title">
-                     <h5 class="mb-2">Ls. Trần Hoàng Hải Phong</h5>
-                     <ul class="list-unstyled">
-                        <li>Co-Founder - TVL Legal System</li>
-                        <li>Founder - TVL Law Firm</li>
-                        <li>Giám đốc điều hành</li>
-                     </ul>
-                  </div>
-               </div>
-            </a>
-         </div>
-         <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp pt-3 " data-wow-delay="0.4s">
-            <a href="team_3.html">
-               <div class="team-item">
-                  <div class="team-img">
-                     <img src="public/img/team/avt_3.png" class="img-fluid" alt="">
-                  </div>
-                  <div class="team-title">
-                     <h5 class="mb-2">Ls. Bùi Văn Đức</h5>
-                     <ul class="list-unstyled">
-                        <li>Co-Founder - TVL Law Firm</li>
-                        <li>Phó Giám đốc</li>
-                     </ul>
-                  </div>
-               </div>
-            </a>
-         </div>
-         <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp pt-3" data-wow-delay="0.4s">
-            <a href="team_4.html">
-               <div class="team-item">
-                  <div class="team-img">
-                     <img src="public/img/team/avt_4.png" class="img-fluid" alt="">
-                  </div>
-                  <div class="team-title">
-                     <h5 class="mb-2">Ls. Đỗ Trọng Hiền</h5>
-                     <ul class="list-unstyled">
-                        <li>Co-Founder - TVL Law Firm</li>
-                        <li>Phó Giám đốc</li>
-                     </ul>
-                  </div>
-               </div>
-            </a>
-         </div>
 
-      </div>
-      <div class="row justify-content-center">
-         <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp pt-3" data-wow-delay="0.4s">
-            <a href="team_5.html">
-               <div class="team-item">
-                  <div class="team-img">
-                     <img src="public/img/team/avt_5.png" class="img-fluid" alt="">
-                  </div>
-                  <div class="team-title">
-                     <h5 class="mb-2">Ls. Đặng Trần Kha</h5>
-                     <ul class="list-unstyled">
-                        <li>Trưởng phòng giao dịch </li>
-                        <li>TVL Law Firm</li>
-                     </ul>
-                  </div>
-               </div>
-            </a>
-         </div>
-         <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp pt-3" data-wow-delay="0.4s">
-            <a href="#">
-               <div class="team-item">
-                  <div class="team-img">
-                     <img src="public/img/team/avt_7.png" class="img-fluid" alt="">
-                  </div>
-                  <div class="team-title">
-                     <h5 class="mb-2">Trần Thùy Trang</h5>
-                     <ul class="list-unstyled">
-                        <li>Trợ lý luật sư</li>
-                     </ul>
-                  </div>
-               </div>
-            </a>
-         </div>
-         <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp pt-3" data-wow-delay="0.4s">
-            <a href="#">
-               <div class="team-item">
-                  <div class="team-img">
-                     <img src="public/img/team/avt_6.png" class="img-fluid" alt="">
-                  </div>
-                  <div class="team-title">
-                     <h5 class="mb-2">Nguyễn Thiện Nhân</h5>
-                     <ul class="list-unstyled">
-                        <li>Trợ lý luật sư</li>
-                     </ul>
-                  </div>
-               </div>
-            </a>
-         </div>
-      </div>
-      <div class="row g-4 justify-content-center">
+      <?php
+      // Query all team members ordered by menu_order
+      $team_args = array(
+         'post_type' => 'team_member',
+         'posts_per_page' => -1,
+         'orderby' => 'menu_order',
+         'order' => 'ASC'
+      );
 
-      </div>
+      $team_query = new WP_Query($team_args);
+
+      if ($team_query->have_posts()) :
+         $counter = 0;
+         $members_per_row = 4;
+
+         while ($team_query->have_posts()) : $team_query->the_post();
+            $positions = get_post_meta(get_the_ID(), '_team_positions', true);
+
+            // Start new row for every 4 members
+            if ($counter % $members_per_row == 0) :
+               if ($counter > 0) echo '</div>'; // Close previous row
+               echo '<div class="row g-3 justify-content-center pb-3">';
+            endif;
+            ?>
+
+            <div class="col-md-6 col-lg-6 col-xl-3 wow fadeInUp pt-3" data-wow-delay="0.4s">
+               <a href="<?php echo get_permalink(); ?>">
+                  <div class="team-item">
+                     <div class="team-img">
+                        <?php if (has_post_thumbnail()) : ?>
+                           <?php the_post_thumbnail('full', array('class' => 'img-fluid', 'alt' => get_the_title())); ?>
+                        <?php else : ?>
+                           <img src="<?php echo get_template_directory_uri(); ?>/public/img/team/default-avatar.png" class="img-fluid" alt="<?php the_title(); ?>">
+                        <?php endif; ?>
+                     </div>
+                     <div class="team-title">
+                        <h5 class="mb-2"><?php the_title(); ?></h5>
+                        <?php if ($positions && is_array($positions)) : ?>
+                           <ul class="list-unstyled">
+                              <?php foreach ($positions as $position) : ?>
+                                 <li><?php echo esc_html($position); ?></li>
+                              <?php endforeach; ?>
+                           </ul>
+                        <?php endif; ?>
+                     </div>
+                  </div>
+               </a>
+            </div>
+
+            <?php
+            $counter++;
+         endwhile;
+
+         // Close the last row
+         echo '</div>';
+
+         wp_reset_postdata();
+      else :
+         echo '<p class="text-center">Chưa có thành viên nào được thêm.</p>';
+      endif;
+      ?>
+
    </div>
 </div>
 
