@@ -1011,3 +1011,91 @@ function tvl_enqueue_practice_area_scripts($hook) {
     }
 }
 add_action('admin_enqueue_scripts', 'tvl_enqueue_practice_area_scripts');
+
+// Handle Contact Form Submission
+function tvl_handle_contact_form() {
+    // Verify nonce
+    if (!isset($_POST['contact_nonce']) || !wp_verify_nonce($_POST['contact_nonce'], 'tvl_contact_form_nonce')) {
+        wp_die('Security check failed');
+    }
+
+    // Sanitize form data
+    $name = sanitize_text_field($_POST['contact_name']);
+    $email = sanitize_email($_POST['contact_email']);
+    $phone = sanitize_text_field($_POST['contact_phone']);
+    $field = sanitize_text_field($_POST['contact_field']);
+    $subject = sanitize_text_field($_POST['contact_subject']);
+    $message = sanitize_textarea_field($_POST['contact_message']);
+
+    // Validate email
+    if (!is_email($email)) {
+        wp_redirect(add_query_arg('contact', 'invalid_email', wp_get_referer()));
+        exit;
+    }
+
+    // Prepare email
+    $to = get_option('admin_email'); // Send to site admin email
+    $email_subject = '[TVL Legal System] ' . $subject;
+
+    $email_message = "Thông tin liên hệ mới từ website:\n\n";
+    $email_message .= "Họ & Tên: " . $name . "\n";
+    $email_message .= "Email: " . $email . "\n";
+    $email_message .= "Số điện thoại: " . $phone . "\n";
+    $email_message .= "Lĩnh vực: " . $field . "\n";
+    $email_message .= "Chủ đề: " . $subject . "\n\n";
+    $email_message .= "Nội dung:\n" . $message . "\n";
+
+    $headers = array(
+        'Content-Type: text/plain; charset=UTF-8',
+        'From: ' . $name . ' <' . $email . '>',
+        'Reply-To: ' . $email
+    );
+
+    // Send email
+    $sent = wp_mail($to, $email_subject, $email_message, $headers);
+
+    // Redirect with status
+    if ($sent) {
+        wp_redirect(add_query_arg('contact', 'success', wp_get_referer()));
+    } else {
+        wp_redirect(add_query_arg('contact', 'failed', wp_get_referer()));
+    }
+    exit;
+}
+add_action('admin_post_tvl_contact_form', 'tvl_handle_contact_form');
+add_action('admin_post_nopriv_tvl_contact_form', 'tvl_handle_contact_form');
+
+// Display contact form messages
+function tvl_contact_form_messages() {
+    if (!isset($_GET['contact'])) {
+        return;
+    }
+
+    $status = $_GET['contact'];
+    $message = '';
+    $type = 'success';
+
+    switch ($status) {
+        case 'success':
+            $message = 'Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể.';
+            $type = 'success';
+            break;
+        case 'failed':
+            $message = 'Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại.';
+            $type = 'danger';
+            break;
+        case 'invalid_email':
+            $message = 'Email không hợp lệ. Vui lòng kiểm tra lại.';
+            $type = 'warning';
+            break;
+    }
+
+    if ($message) {
+        echo '<div class="alert alert-' . $type . ' alert-dismissible fade show" role="alert" style="position: fixed; top: 100px; right: 20px; z-index: 9999; max-width: 400px;">';
+        echo $message;
+        echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+        echo '</div>';
+        echo '<script>setTimeout(function(){ var alert = document.querySelector(".alert"); if(alert) alert.remove(); }, 5000);</script>';
+    }
+}
+add_action('wp_footer', 'tvl_contact_form_messages');
