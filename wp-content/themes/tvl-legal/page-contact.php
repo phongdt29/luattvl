@@ -68,52 +68,18 @@ get_header();
                </div>
                <div class="bg-light p-5 rounded h-100 wow fadeInUp" data-wow-delay="0.2s">
                   <h4 class="text-primary">Lời nhắn</h4>
-                  <form id="contactForm" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-                     <input type="hidden" name="action" value="tvl_contact_form">
-                     <?php wp_nonce_field('tvl_contact_form_nonce', 'contact_nonce'); ?>
-
-                     <div class="row g-4">
-                        <div class="col-lg-12 col-xl-6">
-                           <div class="form-floating">
-                              <input type="text" class="form-control border-0" id="contact_name" name="contact_name" placeholder="Your Name" required>
-                              <label for="contact_name">Họ & Tên</label>
-                           </div>
-                        </div>
-                        <div class="col-lg-12 col-xl-6">
-                           <div class="form-floating">
-                              <input type="email" class="form-control border-0" id="contact_email" name="contact_email" placeholder="Your Email" required>
-                              <label for="contact_email">Email</label>
-                           </div>
-                        </div>
-                        <div class="col-lg-12 col-xl-6">
-                           <div class="form-floating">
-                              <input type="tel" class="form-control border-0" id="contact_phone" name="contact_phone" placeholder="Phone" required>
-                              <label for="contact_phone">Số điện thoại</label>
-                           </div>
-                        </div>
-                        <div class="col-lg-12 col-xl-6">
-                           <div class="form-floating">
-                              <input type="text" class="form-control border-0" id="contact_field" name="contact_field" placeholder="Project">
-                              <label for="contact_field">Lĩnh vực</label>
-                           </div>
-                        </div>
-                        <div class="col-12">
-                           <div class="form-floating">
-                              <input type="text" class="form-control border-0" id="contact_subject" name="contact_subject" placeholder="Subject" required>
-                              <label for="contact_subject">Chủ đề</label>
-                           </div>
-                        </div>
-                        <div class="col-12">
-                           <div class="form-floating">
-                              <textarea class="form-control border-0" placeholder="Leave a message here" id="contact_message" name="contact_message" style="height: 160px" required></textarea>
-                              <label for="contact_message">Nội dung</label>
-                           </div>
-                        </div>
-                        <div class="col-12">
-                           <button type="submit" class="btn btn-primary w-100 py-3">Gửi</button>
-                        </div>
-                     </div>
-                  </form>
+                  <div class="tvl-contact-form">
+                     <?php
+                     // Display Contact Form 7
+                     // Replace 'YOUR_FORM_ID' with your actual Contact Form 7 ID
+                     // Or use the form title like: echo do_shortcode('[contact-form-7 id="123" title="Contact form"]');
+                     if (function_exists('wpcf7_contact_form')) {
+                        echo do_shortcode('[contact-form-7 id="f34f9aa" title="Contact form 1"]');
+                     } else {
+                        echo '<p class="alert alert-warning">Vui lòng cài đặt plugin Contact Form 7 để sử dụng form liên hệ.</p>';
+                     }
+                     ?>
+                  </div>
                </div>
             </div>
          </div>

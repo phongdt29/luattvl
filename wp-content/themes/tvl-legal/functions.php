@@ -803,6 +803,118 @@ function tvl_duplicate_video() {
 }
 add_action('admin_action_tvl_duplicate_video', 'tvl_duplicate_video');
 
+// Add custom CSS for Contact Form 7 styling
+function tvl_cf7_custom_styles() {
+    ?>
+    <style>
+        /* Contact Form 7 Custom Styles */
+        .tvl-contact-form .wpcf7-form {
+            margin: 0;
+        }
+
+        .tvl-contact-form .wpcf7-form-control-wrap {
+            display: block;
+            width: 100%;
+        }
+
+        .tvl-contact-form input[type="text"],
+        .tvl-contact-form input[type="email"],
+        .tvl-contact-form input[type="tel"],
+        .tvl-contact-form textarea,
+        .tvl-contact-form select {
+            width: 100%;
+            padding: 1rem 0.75rem;
+            border: 0;
+            border-radius: 0.25rem;
+            background-color: #fff;
+            font-size: 1rem;
+            line-height: 1.5;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .tvl-contact-form input[type="text"]:focus,
+        .tvl-contact-form input[type="email"]:focus,
+        .tvl-contact-form input[type="tel"]:focus,
+        .tvl-contact-form textarea:focus,
+        .tvl-contact-form select:focus {
+            outline: 0;
+            border-color: #0275ff;
+            box-shadow: 0 0 0 0.25rem rgba(2, 117, 255, 0.25);
+        }
+
+        .tvl-contact-form textarea {
+            min-height: 160px;
+            resize: vertical;
+        }
+
+        .tvl-contact-form .wpcf7-submit {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 0.25rem;
+            background-color: #0275ff;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.15s ease-in-out;
+        }
+
+        .tvl-contact-form .wpcf7-submit:hover {
+            background-color: #0056b3;
+        }
+
+        .tvl-contact-form .wpcf7-spinner {
+            margin-left: 10px;
+        }
+
+        .tvl-contact-form .wpcf7-response-output {
+            margin: 1rem 0 0;
+            padding: 0.75rem 1.25rem;
+            border: 1px solid transparent;
+            border-radius: 0.25rem;
+        }
+
+        .tvl-contact-form .wpcf7-validation-errors,
+        .tvl-contact-form .wpcf7-acceptance-missing {
+            color: #842029;
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+        }
+
+        .tvl-contact-form .wpcf7-mail-sent-ok {
+            color: #0f5132;
+            background-color: #d1e7dd;
+            border-color: #badbcc;
+        }
+
+        .tvl-contact-form .wpcf7-mail-sent-ng,
+        .tvl-contact-form .wpcf7-aborted {
+            color: #842029;
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+        }
+
+        .tvl-contact-form .wpcf7-spam-blocked {
+            color: #664d03;
+            background-color: #fff3cd;
+            border-color: #ffecb5;
+        }
+
+        .tvl-contact-form .wpcf7-not-valid-tip {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Grid layout for form fields */
+        .tvl-contact-form .wpcf7-form p {
+            margin-bottom: 1rem;
+        }
+    </style>
+    <?php
+}
+add_action('wp_head', 'tvl_cf7_custom_styles');
+
 // function tvl_enqueue_assets() {
 //     // IMPORTANT: copy your original 'public' folder into the theme root (tvl-legal/public) so these files exist
 //     wp_enqueue_style('bootstrap', get_template_directory_uri() . '/public/css/bootstrap.min.css');
