@@ -18,8 +18,95 @@ get_header(); ?>
 <div class="container-fluid position-relative p-0">
    <!-- Carousel Start -->
    <div class="header-carousel owl-carousel">
+      <?php
+      // Query sliders
+      $slider_args = array(
+         'post_type' => 'slider',
+         'posts_per_page' => -1,
+         'orderby' => 'menu_order',
+         'order' => 'ASC',
+         'post_status' => 'publish'
+      );
+      $slider_query = new WP_Query($slider_args);
+
+      if ($slider_query->have_posts()) :
+         while ($slider_query->have_posts()) : $slider_query->the_post();
+            // Get slider meta data
+            $subtitle = get_post_meta(get_the_ID(), '_slider_subtitle', true);
+            $button_text = get_post_meta(get_the_ID(), '_slider_button_text', true);
+            $button_url = get_post_meta(get_the_ID(), '_slider_button_url', true);
+            $video_url = get_post_meta(get_the_ID(), '_slider_video_url', true);
+            $facebook_url = get_post_meta(get_the_ID(), '_slider_facebook_url', true);
+            $twitter_url = get_post_meta(get_the_ID(), '_slider_twitter_url', true);
+            $instagram_url = get_post_meta(get_the_ID(), '_slider_instagram_url', true);
+      ?>
       <div class="header-carousel-item">
-         <img src="public/img/carousel-1.jpg" class="img-fluid" alt="Image">
+         <?php if (has_post_thumbnail()) : ?>
+            <?php the_post_thumbnail('full', array('class' => 'img-fluid', 'alt' => get_the_title())); ?>
+         <?php else : ?>
+            <img src="<?php echo get_template_directory_uri(); ?>/public/img/carousel-1.jpg" class="img-fluid" alt="<?php the_title(); ?>">
+         <?php endif; ?>
+         <div class="carousel-caption">
+            <div class="container">
+               <div class="row gy-0 gx-5">
+                  <div class="col-xl-12 animated fadeInRight">
+                     <div class="text-sm-center text-md-start">
+                        <?php if ($subtitle) : ?>
+                           <h4 class="text-primary fw-bold mb-1"><?php echo esc_html($subtitle); ?></h4>
+                        <?php endif; ?>
+                        <h1 class="display-5 text-uppercase text-white mb-1"><?php the_title(); ?></h1>
+                        <?php if (get_the_content()) : ?>
+                           <h4 class="text-primary text-white fw-bold mb-4"><?php echo wp_kses_post(get_the_content()); ?></h4>
+                        <?php endif; ?>
+
+                        <div class="d-flex justify-content-center justify-content-md-start flex-shrink-0 mb-4">
+                           <?php if ($video_url) : ?>
+                              <button id="openPopup" class="btn btn-primary rounded-pill py-3 px-4 px-md-5 me-2"
+                                 data-bs-toggle="modal" data-bs-target="#videoModal" data-video-url="<?php echo esc_url($video_url); ?>">
+                                 <i class="fas fa-play-circle me-2"></i> Watch Video
+                              </button>
+                           <?php endif; ?>
+
+                           <?php if ($button_text && $button_url) : ?>
+                              <a class="btn btn-light rounded-pill py-3 px-4 px-md-5 ms-2"
+                                 href="<?php echo esc_url($button_url); ?>">
+                                 <?php echo esc_html($button_text); ?>
+                              </a>
+                           <?php endif; ?>
+                        </div>
+
+                        <?php if ($facebook_url || $twitter_url || $instagram_url) : ?>
+                        <div class="d-flex align-items-center justify-content-center justify-content-md-start">
+                           <h2 class="text-white me-2">Follow Us:</h2>
+                           <div class="d-flex justify-content-start ms-2">
+                              <?php if ($facebook_url) : ?>
+                                 <a class="btn btn-md-square btn-light rounded-circle me-2" href="<?php echo esc_url($facebook_url); ?>" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                              <?php endif; ?>
+                              <?php if ($twitter_url) : ?>
+                                 <a class="btn btn-md-square btn-light rounded-circle mx-2" href="<?php echo esc_url($twitter_url); ?>" target="_blank"><i class="fab fa-twitter"></i></a>
+                              <?php endif; ?>
+                              <?php if ($instagram_url) : ?>
+                                 <a class="btn btn-md-square btn-light rounded-circle mx-2" href="<?php echo esc_url($instagram_url); ?>" target="_blank"><i class="fab fa-instagram"></i></a>
+                              <?php endif; ?>
+                           </div>
+                        </div>
+                        <?php endif; ?>
+                     </div>
+                  </div>
+                  <div class="col-lg-0 col-xl-5">
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <?php
+         endwhile;
+         wp_reset_postdata();
+      else :
+      ?>
+      <!-- Fallback slider if no sliders are created -->
+      <div class="header-carousel-item">
+         <img src="<?php echo get_template_directory_uri(); ?>/public/img/carousel-1.jpg" class="img-fluid" alt="Image">
          <div class="carousel-caption">
             <div class="container">
                <div class="row gy-0 gx-5">
@@ -27,32 +114,22 @@ get_header(); ?>
                      <div class="text-sm-center text-md-start">
                         <h4 class="text-primary fw-bold mb-1">WELCOME TO</h4>
                         <h1 class="display-5 text-uppercase text-white mb-1">TVL Legal System</h1>
-                        <h4 class="text-primary text-white fw-bold mb-4">When you choose our
-                           service, we
-                           will
-                           make it at your highest
-                           satisfaction.</h4>
+                        <h4 class="text-primary text-white fw-bold mb-4">When you choose our service, we will make it at your highest satisfaction.</h4>
 
                         <div class="d-flex justify-content-center justify-content-md-start flex-shrink-0 mb-4">
-                           <!-- Button to Open Popup -->
                            <button id="openPopup" class="btn btn-primary rounded-pill py-3 px-4 px-md-5 me-2"
                               data-bs-toggle="modal" data-bs-target="#videoModal">
                               <i class="fas fa-play-circle me-2"></i> Watch Video
                            </button>
 
-                           <a class="btn btn-light rounded-pill py-3 px-4 px-md-5 ms-2"
-                              href="about_1.html">Learn
-                              More</a>
+                           <a class="btn btn-light rounded-pill py-3 px-4 px-md-5 ms-2" href="#">Learn More</a>
                         </div>
                         <div class="d-flex align-items-center justify-content-center justify-content-md-start">
                            <h2 class="text-white me-2">Follow Us:</h2>
                            <div class="d-flex justify-content-start ms-2">
-                              <a class="btn btn-md-square btn-light rounded-circle me-2" href="#"><i
-                                    class="fab fa-facebook-f"></i></a>
-                              <a class="btn btn-md-square btn-light rounded-circle mx-2" href="#"><i
-                                    class="fab fa-twitter"></i></a>
-                              <a class="btn btn-md-square btn-light rounded-circle mx-2" href="#"><i
-                                    class="fab fa-instagram"></i></a>
+                              <a class="btn btn-md-square btn-light rounded-circle me-2" href="#"><i class="fab fa-facebook-f"></i></a>
+                              <a class="btn btn-md-square btn-light rounded-circle mx-2" href="#"><i class="fab fa-twitter"></i></a>
+                              <a class="btn btn-md-square btn-light rounded-circle mx-2" href="#"><i class="fab fa-instagram"></i></a>
                            </div>
                         </div>
                      </div>
@@ -63,6 +140,7 @@ get_header(); ?>
             </div>
          </div>
       </div>
+      <?php endif; ?>
    </div>
    <!-- Carousel End -->
 </div>
@@ -93,59 +171,87 @@ get_header(); ?>
          <div class="col-lg-3 py-2">
             <div class="heading-section ftco-animate">
                <h2 class="mb-2 ml-3 py-3" style="font-weight: 700">Why select us?</h2>
-               <img src="public/img/about-us.png" alt="" class="img-fluid" style="border-radius: 5px;">
-               <a href="about_2.html"
+               <img src="<?php echo get_template_directory_uri(); ?>/public/img/about-us.png" alt="" class="img-fluid" style="border-radius: 5px;">
+               <a href="<?php echo home_url('/gioi-thieu/van-phong-luat-su-tran-van-linh'); ?>"
                   class="col-md-12 col-lg-12 col-12 col-sm-12 btn btn-primary rounded-pill my-3 py-2"
-                  style="font-size: 0.75rem;">Văn
-                  phòng
-                  luật sư Trần Vân
-                  Linh</a>
-               <a href="about_3.html"
+                  style="font-size: 0.75rem;">Văn phòng luật sư Trần Vân Linh</a>
+               <a href="<?php echo home_url('/gioi-thieu/cong-ty-luat-tnhh-tvl'); ?>"
                   class="col-md-12 col-lg-12 col-12 col-sm-12 btn btn-primary rounded-pill py-2 mb-3"
-                  style="font-size: 0.75rem;">Công
-                  ty luật TNHH TVL</a>
+                  style="font-size: 0.75rem;">Công ty luật TNHH TVL</a>
             </div>
          </div>
          <div class="col-lg-9 services-wrap px-4 pt-5">
             <div class="row pt-md-3">
-               <div class="col-md-4 d-flex align-items-stretch">
-                  <div class="services text-center">
-                     <div class="icon d-flex justify-content-center align-items-center">
-                        <img class="col-md-12" src="public/img/ab-1.jpg" alt="" width="200px">
+               <?php
+               // Query features ordered by menu_order
+               $feature_args = array(
+                  'post_type' => 'feature',
+                  'posts_per_page' => 3,
+                  'orderby' => 'menu_order',
+                  'order' => 'ASC',
+                  'post_status' => 'publish'
+               );
+
+               $feature_query = new WP_Query($feature_args);
+
+               if ($feature_query->have_posts()) :
+                  while ($feature_query->have_posts()) : $feature_query->the_post();
+               ?>
+                     <div class="col-md-4 d-flex align-items-stretch">
+                        <div class="services text-center">
+                           <div class="icon d-flex justify-content-center align-items-center">
+                              <?php if (has_post_thumbnail()) : ?>
+                                 <?php the_post_thumbnail('medium', array('class' => 'col-md-12', 'width' => '200px')); ?>
+                              <?php else : ?>
+                                 <img class="col-md-12" src="<?php echo get_template_directory_uri(); ?>/public/img/default-feature.jpg" alt="<?php the_title(); ?>" width="200px">
+                              <?php endif; ?>
+                           </div>
+                           <div class="text">
+                              <h3><?php the_title(); ?></h3>
+                              <p><?php echo wp_trim_words(get_the_content(), 40, '...'); ?></p>
+                           </div>
+                        </div>
                      </div>
-                     <div class="text">
-                        <h3>Hiệu quả</h3>
-                        <p>TVL Legal System luôn chú trọng áp dụng các giải pháp pháp lý linh hoạt, tối ưu để đảm bảo
-                           khách hàng nhận được kết quả tốt nhất trong thời gian ngắn nhất.</p>
+               <?php
+                  endwhile;
+                  wp_reset_postdata();
+               else :
+               ?>
+                  <!-- Fallback content nếu chưa có tính năng nào -->
+                  <div class="col-md-4 d-flex align-items-stretch">
+                     <div class="services text-center">
+                        <div class="icon d-flex justify-content-center align-items-center">
+                           <img class="col-md-12" src="<?php echo get_template_directory_uri(); ?>/public/img/ab-1.jpg" alt="" width="200px">
+                        </div>
+                        <div class="text">
+                           <h3>Hiệu quả</h3>
+                           <p>TVL Legal System luôn chú trọng áp dụng các giải pháp pháp lý linh hoạt, tối ưu để đảm bảo khách hàng nhận được kết quả tốt nhất trong thời gian ngắn nhất.</p>
+                        </div>
                      </div>
                   </div>
-               </div>
-               <div class="col-md-4 d-flex align-items-stretch">
-                  <div class="services text-center">
-                     <div class="icon d-flex justify-content-center align-items-center">
-                        <img class="col-md-12" src="public/img/ab-2.png" alt="" width="200px">
-                     </div>
-                     <div class="text">
-                        <h3>Uy tín</h3>
-                        <p>TVL Legal System luôn không ngừng nâng cao chất lượng dịch vụ và tuân
-                           thủ các chuẩn mực đạo
-                           đức nghề nghiệp, để tạo dựng niềm tin lâu dài với các đối tác và khách hàng.</p>
+                  <div class="col-md-4 d-flex align-items-stretch">
+                     <div class="services text-center">
+                        <div class="icon d-flex justify-content-center align-items-center">
+                           <img class="col-md-12" src="<?php echo get_template_directory_uri(); ?>/public/img/ab-2.png" alt="" width="200px">
+                        </div>
+                        <div class="text">
+                           <h3>Uy tín</h3>
+                           <p>TVL Legal System luôn không ngừng nâng cao chất lượng dịch vụ và tuân thủ các chuẩn mực đạo đức nghề nghiệp, để tạo dựng niềm tin lâu dài với các đối tác và khách hàng.</p>
+                        </div>
                      </div>
                   </div>
-               </div>
-               <div class="col-md-4 d-flex align-items-stretch">
-                  <div class="services text-center">
-                     <div class="icon d-flex justify-content-center align-items-center">
-                        <img class="col-md-12" src="public/img/ab-3.png" alt="" width="200px">
-                     </div>
-                     <div class="text">
-                        <h3>Tận tâm</h3>
-                        <p>TVL Legal System không chỉ hỗ trợ về mặt pháp lý mà còn lắng nghe, đồng hành trong từng giai
-                           đoạn của quá trình giải quyết vụ việc của khách hàng.
-                        </p>
+                  <div class="col-md-4 d-flex align-items-stretch">
+                     <div class="services text-center">
+                        <div class="icon d-flex justify-content-center align-items-center">
+                           <img class="col-md-12" src="<?php echo get_template_directory_uri(); ?>/public/img/ab-3.png" alt="" width="200px">
+                        </div>
+                        <div class="text">
+                           <h3>Tận tâm</h3>
+                           <p>TVL Legal System không chỉ hỗ trợ về mặt pháp lý mà còn lắng nghe, đồng hành trong từng giai đoạn của quá trình giải quyết vụ việc của khách hàng.</p>
+                        </div>
                      </div>
                   </div>
-               </div>
+               <?php endif; ?>
             </div>
          </div>
       </div>

@@ -927,6 +927,273 @@ add_action('wp_head', 'tvl_cf7_custom_styles');
 // }
 // add_action('wp_enqueue_scripts', 'tvl_enqueue_assets');
 
+// Register Slider/Banner Custom Post Type
+function tvl_register_slider_post_type() {
+    $labels = array(
+        'name' => 'Banner Slides',
+        'singular_name' => 'Banner Slide',
+        'menu_name' => 'Banner Slides',
+        'add_new' => 'Thêm Mới',
+        'add_new_item' => 'Thêm Banner Mới',
+        'edit_item' => 'Sửa Banner',
+        'new_item' => 'Banner Mới',
+        'view_item' => 'Xem Banner',
+        'search_items' => 'Tìm Banner',
+        'not_found' => 'Không tìm thấy banner',
+        'not_found_in_trash' => 'Không có banner trong thùng rác'
+    );
+
+    $args = array(
+        'labels' => $labels,
+        'public' => true,
+        'has_archive' => false,
+        'publicly_queryable' => false,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'show_in_nav_menus' => false,
+        'menu_icon' => 'dashicons-images-alt2',
+        'supports' => array('title', 'editor', 'thumbnail'),
+        'menu_position' => 4,
+    );
+
+    register_post_type('slider', $args);
+}
+add_action('init', 'tvl_register_slider_post_type');
+
+// Add Meta Boxes for Slider
+function tvl_slider_meta_boxes() {
+    add_meta_box(
+        'slider_details',
+        'Chi Tiết Banner',
+        'tvl_slider_details_callback',
+        'slider',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'tvl_slider_meta_boxes');
+
+function tvl_slider_details_callback($post) {
+    wp_nonce_field('tvl_save_slider_meta', 'tvl_slider_meta_nonce');
+
+    $subtitle = get_post_meta($post->ID, '_slider_subtitle', true);
+    $button_text = get_post_meta($post->ID, '_slider_button_text', true);
+    $button_url = get_post_meta($post->ID, '_slider_button_url', true);
+    $video_url = get_post_meta($post->ID, '_slider_video_url', true);
+    $facebook_url = get_post_meta($post->ID, '_slider_facebook', true);
+    $twitter_url = get_post_meta($post->ID, '_slider_twitter', true);
+    $instagram_url = get_post_meta($post->ID, '_slider_instagram', true);
+
+    ?>
+    <table class="form-table">
+        <tr>
+            <th><label for="slider_subtitle">Tiêu Đề Phụ (Subtitle)</label></th>
+            <td>
+                <input type="text" id="slider_subtitle" name="slider_subtitle" value="<?php echo esc_attr($subtitle); ?>" class="large-text" placeholder="VD: When you choose our service...">
+                <p class="description">Dòng text phía dưới tiêu đề chính</p>
+            </td>
+        </tr>
+        <tr>
+            <th><label for="slider_button_text">Text Nút (Button Text)</label></th>
+            <td>
+                <input type="text" id="slider_button_text" name="slider_button_text" value="<?php echo esc_attr($button_text); ?>" class="regular-text" placeholder="Learn More">
+            </td>
+        </tr>
+        <tr>
+            <th><label for="slider_button_url">Link Nút (Button URL)</label></th>
+            <td>
+                <input type="url" id="slider_button_url" name="slider_button_url" value="<?php echo esc_url($button_url); ?>" class="large-text" placeholder="https://example.com">
+            </td>
+        </tr>
+        <tr>
+            <th><label for="slider_video_url">Video URL</label></th>
+            <td>
+                <input type="url" id="slider_video_url" name="slider_video_url" value="<?php echo esc_url($video_url); ?>" class="large-text" placeholder="https://example.com/video.mp4">
+                <p class="description">Link video cho nút "Watch Video" (không bắt buộc)</p>
+            </td>
+        </tr>
+        <tr>
+            <th colspan="2"><h3>Social Media Links</h3></th>
+        </tr>
+        <tr>
+            <th><label for="slider_facebook">Facebook URL</label></th>
+            <td>
+                <input type="url" id="slider_facebook" name="slider_facebook" value="<?php echo esc_url($facebook_url); ?>" class="large-text" placeholder="https://facebook.com/yourpage">
+            </td>
+        </tr>
+        <tr>
+            <th><label for="slider_twitter">Twitter URL</label></th>
+            <td>
+                <input type="url" id="slider_twitter" name="slider_twitter" value="<?php echo esc_url($twitter_url); ?>" class="large-text" placeholder="https://twitter.com/yourprofile">
+            </td>
+        </tr>
+        <tr>
+            <th><label for="slider_instagram">Instagram URL</label></th>
+            <td>
+                <input type="url" id="slider_instagram" name="slider_instagram" value="<?php echo esc_url($instagram_url); ?>" class="large-text" placeholder="https://instagram.com/yourprofile">
+            </td>
+        </tr>
+    </table>
+    <?php
+}
+
+function tvl_save_slider_meta($post_id) {
+    if (!isset($_POST['tvl_slider_meta_nonce'])) {
+        return;
+    }
+
+    if (!wp_verify_nonce($_POST['tvl_slider_meta_nonce'], 'tvl_save_slider_meta')) {
+        return;
+    }
+
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+        return;
+    }
+
+    if (!current_user_can('edit_post', $post_id)) {
+        return;
+    }
+
+    // Save all meta fields
+    if (isset($_POST['slider_subtitle'])) {
+        update_post_meta($post_id, '_slider_subtitle', sanitize_text_field($_POST['slider_subtitle']));
+    }
+
+    if (isset($_POST['slider_button_text'])) {
+        update_post_meta($post_id, '_slider_button_text', sanitize_text_field($_POST['slider_button_text']));
+    }
+
+    if (isset($_POST['slider_button_url'])) {
+        update_post_meta($post_id, '_slider_button_url', esc_url_raw($_POST['slider_button_url']));
+    }
+
+    if (isset($_POST['slider_video_url'])) {
+        update_post_meta($post_id, '_slider_video_url', esc_url_raw($_POST['slider_video_url']));
+    }
+
+    if (isset($_POST['slider_facebook'])) {
+        update_post_meta($post_id, '_slider_facebook', esc_url_raw($_POST['slider_facebook']));
+    }
+
+    if (isset($_POST['slider_twitter'])) {
+        update_post_meta($post_id, '_slider_twitter', esc_url_raw($_POST['slider_twitter']));
+    }
+
+    if (isset($_POST['slider_instagram'])) {
+        update_post_meta($post_id, '_slider_instagram', esc_url_raw($_POST['slider_instagram']));
+    }
+}
+add_action('save_post_slider', 'tvl_save_slider_meta');
+
+// Enable menu_order support for sliders
+function tvl_slider_enable_menu_order() {
+    add_post_type_support('slider', 'page-attributes');
+}
+add_action('init', 'tvl_slider_enable_menu_order');
+
+// Add custom columns to Sliders admin
+function tvl_slider_columns($columns) {
+    $new_columns = array();
+    $new_columns['cb'] = $columns['cb'];
+    $new_columns['thumbnail'] = 'Hình Ảnh';
+    $new_columns['title'] = 'Tiêu Đề';
+    $new_columns['menu_order'] = 'Thứ Tự';
+    $new_columns['date'] = $columns['date'];
+    return $new_columns;
+}
+add_filter('manage_slider_posts_columns', 'tvl_slider_columns');
+
+function tvl_slider_column_content($column_name, $post_id) {
+    if ($column_name == 'menu_order') {
+        $order = get_post_field('menu_order', $post_id);
+        echo $order;
+    }
+
+    if ($column_name == 'thumbnail') {
+        $thumbnail = get_the_post_thumbnail($post_id, array(100, 60));
+        echo $thumbnail ? $thumbnail : '—';
+    }
+}
+add_action('manage_slider_posts_custom_column', 'tvl_slider_column_content', 10, 2);
+
+// Make sliders sortable
+function tvl_slider_sortable_columns($columns) {
+    $columns['menu_order'] = 'menu_order';
+    return $columns;
+}
+add_filter('manage_edit-slider_sortable_columns', 'tvl_slider_sortable_columns');
+
+// Register Features/Services Custom Post Type
+function tvl_register_feature_post_type() {
+    $labels = array(
+        'name' => 'Tính Năng',
+        'singular_name' => 'Tính Năng',
+        'menu_name' => 'Tính Năng',
+        'add_new' => 'Thêm Mới',
+        'add_new_item' => 'Thêm Tính Năng Mới',
+        'edit_item' => 'Sửa Tính Năng',
+        'new_item' => 'Tính Năng Mới',
+        'view_item' => 'Xem Tính Năng',
+        'search_items' => 'Tìm Tính Năng',
+        'not_found' => 'Không tìm thấy tính năng',
+        'not_found_in_trash' => 'Không có tính năng trong thùng rác'
+    );
+
+    $args = array(
+        'labels' => $labels,
+        'public' => true,
+        'has_archive' => false,
+        'publicly_queryable' => false,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'show_in_nav_menus' => false,
+        'menu_icon' => 'dashicons-star-filled',
+        'supports' => array('title', 'editor', 'thumbnail'),
+        'menu_position' => 8,
+    );
+
+    register_post_type('feature', $args);
+}
+add_action('init', 'tvl_register_feature_post_type');
+
+// Enable menu_order support for features
+function tvl_feature_enable_menu_order() {
+    add_post_type_support('feature', 'page-attributes');
+}
+add_action('init', 'tvl_feature_enable_menu_order');
+
+// Add custom columns to Features admin
+function tvl_feature_columns($columns) {
+    $new_columns = array();
+    $new_columns['cb'] = $columns['cb'];
+    $new_columns['thumbnail'] = 'Icon';
+    $new_columns['title'] = 'Tiêu Đề';
+    $new_columns['menu_order'] = 'Thứ Tự';
+    $new_columns['date'] = $columns['date'];
+    return $new_columns;
+}
+add_filter('manage_feature_posts_columns', 'tvl_feature_columns');
+
+function tvl_feature_column_content($column_name, $post_id) {
+    if ($column_name == 'menu_order') {
+        $order = get_post_field('menu_order', $post_id);
+        echo $order;
+    }
+
+    if ($column_name == 'thumbnail') {
+        $thumbnail = get_the_post_thumbnail($post_id, array(60, 60));
+        echo $thumbnail ? $thumbnail : '—';
+    }
+}
+add_action('manage_feature_posts_custom_column', 'tvl_feature_column_content', 10, 2);
+
+// Make features sortable
+function tvl_feature_sortable_columns($columns) {
+    $columns['menu_order'] = 'menu_order';
+    return $columns;
+}
+add_filter('manage_edit-feature_sortable_columns', 'tvl_feature_sortable_columns');
+
 // Register Practice Area Taxonomy
 function tvl_register_practice_area_taxonomy() {
     $labels = array(
