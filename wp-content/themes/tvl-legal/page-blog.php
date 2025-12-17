@@ -172,5 +172,11 @@ get_header();
       </div>
    </div>
 </div>
-
+<div class="container-fluid bg-primary">
+   <div class="py-5">
+      <div class="col-md-12 text-center">
+         <h3 class="stick text-white">"TVL Legal System - Đồng hành pháp lý, kiến tạo niềmtin!"</h3>
+      </div>
+   </div>
+</div>
 <?php get_footer(); ?>

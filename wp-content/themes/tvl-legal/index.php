@@ -201,7 +201,7 @@ get_header(); ?>
                         <div class="services text-center">
                            <div class="icon d-flex justify-content-center align-items-center">
                               <?php if (has_post_thumbnail()) : ?>
-                                 <?php the_post_thumbnail('medium', array('class' => 'col-md-12', 'width' => '200px')); ?>
+                                 <?php the_post_thumbnail('medium', array('class' => '', 'width' => '200px')); ?>
                               <?php else : ?>
                                  <img class="col-md-12" src="<?php echo get_template_directory_uri(); ?>/public/img/default-feature.jpg" alt="<?php the_title(); ?>" width="200px">
                               <?php endif; ?>
