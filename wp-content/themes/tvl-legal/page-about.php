@@ -12,7 +12,7 @@ get_header();
    <!-- Header Start -->
    <div class="container-fluid bg-breadcrumb">
       <div class="container text-center" style="max-width: 700px;">
-         <h3 class="text-white wow fadeInDown display-5" data-wow-delay="0.1s"><?php the_title(); ?></h3>
+         <h3 class="text-white wow fadeInDown display-5" data-wow-delay="0.1s">Về chúng tôi</h3>
       </div>
    </div>
    <!-- Header End -->

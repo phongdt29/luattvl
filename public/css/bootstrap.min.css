@@ -4226,7 +4226,7 @@ fieldset:disabled .btn {
     color: #6c757d;
     content: var(
         --bs-breadcrumb-divider,
-        "../../index.html"
+        "/"
     ); /* rtl: var(--bs-breadcrumb-divider, "/") */
 }
 .breadcrumb-item.active {

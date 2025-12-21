@@ -1342,10 +1342,69 @@ function tvl_practice_area_edit_image_field($term) {
 }
 add_action('practice_area_edit_form_fields', 'tvl_practice_area_edit_image_field');
 
-// Save Practice Area image
+// Add linked post field for Practice Area taxonomy (Edit form)
+function tvl_practice_area_edit_linked_post_field($term) {
+    $linked_post_id = get_term_meta($term->term_id, 'practice_area_post_id', true);
+    ?>
+    <tr class="form-field">
+        <th scope="row"><label for="practice_area_post_id">Bài Viết Chi Tiết</label></th>
+        <td>
+            <select name="practice_area_post_id" id="practice_area_post_id" style="width: 100%; max-width: 400px;">
+                <option value="">-- Chọn bài viết --</option>
+                <?php
+                $posts = get_posts(array(
+                    'post_type' => 'post',
+                    'posts_per_page' => -1,
+                    'orderby' => 'title',
+                    'order' => 'ASC',
+                    'post_status' => 'publish'
+                ));
+                foreach ($posts as $post) {
+                    $selected = ($linked_post_id == $post->ID) ? 'selected' : '';
+                    echo '<option value="' . $post->ID . '" ' . $selected . '>' . esc_html($post->post_title) . ' (ID: ' . $post->ID . ')</option>';
+                }
+                ?>
+            </select>
+            <p class="description">Chọn bài viết chứa nội dung chi tiết cho lĩnh vực này. Nội dung bài viết sẽ hiển thị trên trang lĩnh vực.</p>
+        </td>
+    </tr>
+    <?php
+}
+add_action('practice_area_edit_form_fields', 'tvl_practice_area_edit_linked_post_field');
+
+// Add linked post field for Practice Area taxonomy (Add form)
+function tvl_practice_area_add_linked_post_field() {
+    ?>
+    <div class="form-field">
+        <label for="practice_area_post_id">Bài Viết Chi Tiết</label>
+        <select name="practice_area_post_id" id="practice_area_post_id" style="width: 100%;">
+            <option value="">-- Chọn bài viết --</option>
+            <?php
+            $posts = get_posts(array(
+                'post_type' => 'post',
+                'posts_per_page' => -1,
+                'orderby' => 'title',
+                'order' => 'ASC',
+                'post_status' => 'publish'
+            ));
+            foreach ($posts as $post) {
+                echo '<option value="' . $post->ID . '">' . esc_html($post->post_title) . ' (ID: ' . $post->ID . ')</option>';
+            }
+            ?>
+        </select>
+        <p class="description">Chọn bài viết chứa nội dung chi tiết cho lĩnh vực này.</p>
+    </div>
+    <?php
+}
+add_action('practice_area_add_form_fields', 'tvl_practice_area_add_linked_post_field');
+
+// Save Practice Area fields
 function tvl_save_practice_area_image($term_id) {
     if (isset($_POST['practice_area_image'])) {
         update_term_meta($term_id, 'practice_area_image', sanitize_text_field($_POST['practice_area_image']));
+    }
+    if (isset($_POST['practice_area_post_id'])) {
+        update_term_meta($term_id, 'practice_area_post_id', absint($_POST['practice_area_post_id']));
     }
 }
 add_action('created_practice_area', 'tvl_save_practice_area_image');
@@ -1478,3 +1537,27 @@ function tvl_contact_form_messages() {
     }
 }
 add_action('wp_footer', 'tvl_contact_form_messages');
+
+// Enable Page Templates for Posts
+function tvl_add_post_templates($templates) {
+    $post_templates = array(
+        'taxonomy-practice_area.php' => 'Lĩnh Vực Hoạt Động',
+    );
+    return array_merge($templates, $post_templates);
+}
+add_filter('theme_post_templates', 'tvl_add_post_templates');
+
+// Load custom template for single post
+function tvl_load_post_template($template) {
+    if (is_singular('post')) {
+        $custom_template = get_post_meta(get_the_ID(), '_wp_page_template', true);
+        if ($custom_template && $custom_template !== 'default') {
+            $new_template = locate_template($custom_template);
+            if ($new_template) {
+                return $new_template;
+            }
+        }
+    }
+    return $template;
+}
+add_filter('single_template', 'tvl_load_post_template');
