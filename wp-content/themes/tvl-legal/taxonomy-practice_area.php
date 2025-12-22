@@ -11,12 +11,12 @@ get_header();
 // Get current term
 $current_term = get_queried_object();
 
-// Get linked post ID from term meta
+// Get linked page/post ID from term meta
 $linked_post_id = get_term_meta($current_term->term_id, 'practice_area_post_id', true);
 $post_content = '';
 $post_thumbnail = '';
 
-// Load content from linked post
+// Load content from linked page/post
 if ($linked_post_id) {
    $linked_post = get_post($linked_post_id);
    if ($linked_post && $linked_post->post_status === 'publish') {
@@ -28,7 +28,19 @@ if ($linked_post_id) {
    }
 }
 
-// Fallback to term description if no linked post
+// Fallback: Try to find a page with same slug as term
+if (empty($post_content)) {
+   $page_by_slug = get_page_by_path($current_term->slug);
+   if ($page_by_slug && $page_by_slug->post_status === 'publish') {
+      $post_content = $page_by_slug->post_content;
+      $post_content = apply_filters('the_content', $post_content);
+      if (has_post_thumbnail($page_by_slug->ID)) {
+         $post_thumbnail = get_the_post_thumbnail_url($page_by_slug->ID, 'large');
+      }
+   }
+}
+
+// Fallback to term description if no linked page
 if (empty($post_content)) {
    $post_content = wpautop($current_term->description);
 }
