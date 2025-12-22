@@ -3,7 +3,7 @@
 /**
  * Template Name: Lĩnh Vực Hoạt Động
  * Template for Practice Area - Single Detail View
- * Load content from linked Post ID
+ * Load content from linked Page
  */
 
 get_header();
@@ -11,46 +11,49 @@ get_header();
 // Get current term
 $current_term = get_queried_object();
 
-// Get linked page/post ID from term meta
-$linked_post_id = get_term_meta($current_term->term_id, 'practice_area_post_id', true);
-$post_content = '';
-$post_thumbnail = '';
+// Get linked page ID from term meta
+$linked_page_id = get_term_meta($current_term->term_id, 'practice_area_post_id', true);
+$page_content = '';
+$page_thumbnail = '';
+$linked_page = null;
 
-// Load content from linked page/post
-if ($linked_post_id) {
-   $linked_post = get_post($linked_post_id);
-   if ($linked_post && $linked_post->post_status === 'publish') {
-      $post_content = $linked_post->post_content;
-      $post_content = apply_filters('the_content', $post_content);
-      if (has_post_thumbnail($linked_post_id)) {
-         $post_thumbnail = get_the_post_thumbnail_url($linked_post_id, 'large');
+// Priority 1: Load content from linked page in term meta
+if ($linked_page_id) {
+   $linked_page = get_post($linked_page_id);
+   if ($linked_page && $linked_page->post_status === 'publish') {
+      $page_content = $linked_page->post_content;
+      if (has_post_thumbnail($linked_page_id)) {
+         $page_thumbnail = get_the_post_thumbnail_url($linked_page_id, 'large');
       }
    }
 }
 
-// Fallback: Try to find a page with same slug as term
-if (empty($post_content)) {
+// Priority 2: Find page with same slug as term
+if (empty($page_content)) {
    $page_by_slug = get_page_by_path($current_term->slug);
    if ($page_by_slug && $page_by_slug->post_status === 'publish') {
-      $post_content = $page_by_slug->post_content;
-      $post_content = apply_filters('the_content', $post_content);
+      $linked_page = $page_by_slug;
+      $page_content = $page_by_slug->post_content;
       if (has_post_thumbnail($page_by_slug->ID)) {
-         $post_thumbnail = get_the_post_thumbnail_url($page_by_slug->ID, 'large');
+         $page_thumbnail = get_the_post_thumbnail_url($page_by_slug->ID, 'large');
       }
    }
 }
 
-// Fallback to term description if no linked page
-if (empty($post_content)) {
-   $post_content = wpautop($current_term->description);
+// Priority 3: Fallback to term description
+if (empty($page_content)) {
+   $page_content = $current_term->description;
 }
+
+// Apply the_content filter for proper rendering (shortcodes, blocks, etc.)
+$page_content = apply_filters('the_content', $page_content);
 
 // Get term image as fallback
 $term_image_id = get_term_meta($current_term->term_id, 'practice_area_image', true);
 $term_image_url = $term_image_id ? wp_get_attachment_url($term_image_id) : '';
 
-// Use post thumbnail or term image
-$featured_image = $post_thumbnail ? $post_thumbnail : $term_image_url;
+// Use page thumbnail or term image
+$featured_image = $page_thumbnail ? $page_thumbnail : $term_image_url;
 ?>
 
 <!-- Navbar & Hero Start -->
@@ -82,8 +85,8 @@ $featured_image = $post_thumbnail ? $post_thumbnail : $term_image_url;
 
           
 
-               <div class="practice-area-content">
-                  <?php echo $post_content; ?>
+               <div class="practice-area-content entry-content">
+                  <?php echo $page_content; ?>
                </div>
 
                <!-- Contact CTA -->
@@ -138,9 +141,9 @@ $featured_image = $post_thumbnail ? $post_thumbnail : $term_image_url;
                <!-- Contact Box -->
                <div class="contact-box mt-4 p-4 bg-primary text-white rounded">
                   <h4 class="text-white mb-3">Liên hệ tư vấn</h4>
-                  <p class="mb-2"><i class="fas fa-phone-alt me-2"></i>Hotline: 0934.053.153</p>
-                  <p class="mb-2"><i class="fas fa-envelope me-2"></i>Email: luattvl@luattvl.vn</p>
-                  <p class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>TP. Hồ Chí Minh</p>
+                  <p class="mb-2 text-white"><i class="fas fa-phone-alt me-2"></i>Hotline: 0934.053.153</p>
+                  <p class="mb-2 text-white"><i class="fas fa-envelope me-2"></i>Email: luattvl@luattvl.vn</p>
+                  <p class="mb-0 text-white"><i class="fas fa-map-marker-alt me-2"></i>TP. Hồ Chí Minh</p>
                </div>
             </div>
          </div>
