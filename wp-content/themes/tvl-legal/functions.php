@@ -1347,11 +1347,29 @@ function tvl_practice_area_edit_linked_post_field($term) {
     $linked_post_id = get_term_meta($term->term_id, 'practice_area_post_id', true);
     ?>
     <tr class="form-field">
-        <th scope="row"><label for="practice_area_post_id">Bài Viết Chi Tiết</label></th>
+        <th scope="row"><label for="practice_area_post_id">Trang/Bài Viết Chi Tiết</label></th>
         <td>
             <select name="practice_area_post_id" id="practice_area_post_id" style="width: 100%; max-width: 400px;">
-                <option value="">-- Chọn bài viết --</option>
+                <option value="">-- Chọn trang/bài viết --</option>
                 <?php
+                // Get Pages
+                $pages = get_posts(array(
+                    'post_type' => 'page',
+                    'posts_per_page' => -1,
+                    'orderby' => 'title',
+                    'order' => 'ASC',
+                    'post_status' => 'publish'
+                ));
+                if (!empty($pages)) {
+                    echo '<optgroup label="-- Trang (Pages) --">';
+                    foreach ($pages as $page) {
+                        $selected = ($linked_post_id == $page->ID) ? 'selected' : '';
+                        echo '<option value="' . $page->ID . '" ' . $selected . '>' . esc_html($page->post_title) . ' (ID: ' . $page->ID . ')</option>';
+                    }
+                    echo '</optgroup>';
+                }
+
+                // Get Posts
                 $posts = get_posts(array(
                     'post_type' => 'post',
                     'posts_per_page' => -1,
@@ -1359,13 +1377,17 @@ function tvl_practice_area_edit_linked_post_field($term) {
                     'order' => 'ASC',
                     'post_status' => 'publish'
                 ));
-                foreach ($posts as $post) {
-                    $selected = ($linked_post_id == $post->ID) ? 'selected' : '';
-                    echo '<option value="' . $post->ID . '" ' . $selected . '>' . esc_html($post->post_title) . ' (ID: ' . $post->ID . ')</option>';
+                if (!empty($posts)) {
+                    echo '<optgroup label="-- Bài viết (Posts) --">';
+                    foreach ($posts as $post) {
+                        $selected = ($linked_post_id == $post->ID) ? 'selected' : '';
+                        echo '<option value="' . $post->ID . '" ' . $selected . '>' . esc_html($post->post_title) . ' (ID: ' . $post->ID . ')</option>';
+                    }
+                    echo '</optgroup>';
                 }
                 ?>
             </select>
-            <p class="description">Chọn bài viết chứa nội dung chi tiết cho lĩnh vực này. Nội dung bài viết sẽ hiển thị trên trang lĩnh vực.</p>
+            <p class="description">Chọn trang hoặc bài viết chứa nội dung chi tiết cho lĩnh vực này.</p>
         </td>
     </tr>
     <?php
@@ -1376,10 +1398,27 @@ add_action('practice_area_edit_form_fields', 'tvl_practice_area_edit_linked_post
 function tvl_practice_area_add_linked_post_field() {
     ?>
     <div class="form-field">
-        <label for="practice_area_post_id">Bài Viết Chi Tiết</label>
+        <label for="practice_area_post_id">Trang/Bài Viết Chi Tiết</label>
         <select name="practice_area_post_id" id="practice_area_post_id" style="width: 100%;">
-            <option value="">-- Chọn bài viết --</option>
+            <option value="">-- Chọn trang/bài viết --</option>
             <?php
+            // Get Pages
+            $pages = get_posts(array(
+                'post_type' => 'page',
+                'posts_per_page' => -1,
+                'orderby' => 'title',
+                'order' => 'ASC',
+                'post_status' => 'publish'
+            ));
+            if (!empty($pages)) {
+                echo '<optgroup label="-- Trang (Pages) --">';
+                foreach ($pages as $page) {
+                    echo '<option value="' . $page->ID . '">' . esc_html($page->post_title) . ' (ID: ' . $page->ID . ')</option>';
+                }
+                echo '</optgroup>';
+            }
+
+            // Get Posts
             $posts = get_posts(array(
                 'post_type' => 'post',
                 'posts_per_page' => -1,
@@ -1387,12 +1426,16 @@ function tvl_practice_area_add_linked_post_field() {
                 'order' => 'ASC',
                 'post_status' => 'publish'
             ));
-            foreach ($posts as $post) {
-                echo '<option value="' . $post->ID . '">' . esc_html($post->post_title) . ' (ID: ' . $post->ID . ')</option>';
+            if (!empty($posts)) {
+                echo '<optgroup label="-- Bài viết (Posts) --">';
+                foreach ($posts as $post) {
+                    echo '<option value="' . $post->ID . '">' . esc_html($post->post_title) . ' (ID: ' . $post->ID . ')</option>';
+                }
+                echo '</optgroup>';
             }
             ?>
         </select>
-        <p class="description">Chọn bài viết chứa nội dung chi tiết cho lĩnh vực này.</p>
+        <p class="description">Chọn trang hoặc bài viết chứa nội dung chi tiết cho lĩnh vực này.</p>
     </div>
     <?php
 }
