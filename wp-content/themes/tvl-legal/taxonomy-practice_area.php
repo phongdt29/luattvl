@@ -2,8 +2,7 @@
 
 /**
  * Template Name: Lĩnh Vực Hoạt Động
- * Template for Practice Area - Single Detail View
- * Load content from linked Page
+ * Template for Practice Area - List Posts by Category
  */
 
 get_header();
@@ -11,49 +10,26 @@ get_header();
 // Get current term
 $current_term = get_queried_object();
 
-// Get linked page ID from term meta
-$linked_page_id = get_term_meta($current_term->term_id, 'practice_area_post_id', true);
-$page_content = '';
-$page_thumbnail = '';
-$linked_page = null;
+// Pagination
+$paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
 
-// Priority 1: Load content from linked page in term meta
-if ($linked_page_id) {
-   $linked_page = get_post($linked_page_id);
-   if ($linked_page && $linked_page->post_status === 'publish') {
-      $page_content = $linked_page->post_content;
-      if (has_post_thumbnail($linked_page_id)) {
-         $page_thumbnail = get_the_post_thumbnail_url($linked_page_id, 'large');
-      }
-   }
-}
+// Query posts in this practice area
+$args = array(
+   'post_type' => 'post',
+   'tax_query' => array(
+      array(
+         'taxonomy' => 'practice_area',
+         'field' => 'term_id',
+         'terms' => $current_term->term_id,
+      ),
+   ),
+   'posts_per_page' => 10,
+   'paged' => $paged,
+   'orderby' => 'date',
+   'order' => 'DESC'
+);
 
-// Priority 2: Find page with same slug as term
-if (empty($page_content)) {
-   $page_by_slug = get_page_by_path($current_term->slug);
-   if ($page_by_slug && $page_by_slug->post_status === 'publish') {
-      $linked_page = $page_by_slug;
-      $page_content = $page_by_slug->post_content;
-      if (has_post_thumbnail($page_by_slug->ID)) {
-         $page_thumbnail = get_the_post_thumbnail_url($page_by_slug->ID, 'large');
-      }
-   }
-}
-
-// Priority 3: Fallback to term description
-if (empty($page_content)) {
-   $page_content = $current_term->description;
-}
-
-// Apply the_content filter for proper rendering (shortcodes, blocks, etc.)
-$page_content = apply_filters('the_content', $page_content);
-
-// Get term image as fallback
-$term_image_id = get_term_meta($current_term->term_id, 'practice_area_image', true);
-$term_image_url = $term_image_id ? wp_get_attachment_url($term_image_id) : '';
-
-// Use page thumbnail or term image
-$featured_image = $page_thumbnail ? $page_thumbnail : $term_image_url;
+$practice_posts = new WP_Query($args);
 ?>
 
 <!-- Navbar & Hero Start -->
@@ -61,7 +37,7 @@ $featured_image = $page_thumbnail ? $page_thumbnail : $term_image_url;
    <!-- Header Start -->
    <div class="container-fluid bg-breadcrumb">
       <div class="container text-center py-3" style="max-width: 900px;">
-         <h4 class="text-white display-4 mb-4 wow fadeInDown" data-wow-delay="0.1s">Lĩnh vực</h4>
+         <h4 class="text-white display-4 mb-4 wow fadeInDown" data-wow-delay="0.1s"><?php echo esc_html($current_term->name); ?></h4>
          <nav aria-label="breadcrumb">
             <ol class="breadcrumb justify-content-center mb-0">
                <li class="breadcrumb-item"><a href="<?php echo home_url(); ?>">Trang chủ</a></li>
@@ -75,33 +51,73 @@ $featured_image = $page_thumbnail ? $page_thumbnail : $term_image_url;
 </div>
 <!-- Navbar & Hero End -->
 
-<!-- Practice Area Detail Start -->
+<!-- Practice Area Posts List Start -->
 <section class="ftco-section ftco-degree-bg about">
    <div class="container">
       <div class="row">
          <div class="col-lg-8">
-            <div class="practice-area-detail">
-               <h1 class="display-6 mb-4 text-primary"><?php echo esc_html($current_term->name); ?></h1>
+            <div class="practice-area-posts">
 
-          
-
-               <div class="practice-area-content entry-content">
-                  <?php echo $page_content; ?>
-               </div>
-
-               <!-- Contact CTA -->
-               <div class="contact-cta mt-5 p-4 bg-light rounded">
-                  <h4 class="text-primary mb-3">Bạn cần tư vấn về <?php echo esc_html($current_term->name); ?>?</h4>
-                  <p>Liên hệ ngay với chúng tôi để được tư vấn miễn phí!</p>
-                  <div class="d-flex flex-wrap gap-3">
-                     <a href="tel:0934053153" class="btn btn-primary">
-                        <i class="fas fa-phone-alt me-2"></i>Gọi: 0934.053.153
-                     </a>
-                     <a href="<?php echo home_url('/lien-he/'); ?>" class="btn btn-outline-primary">
-                        <i class="fas fa-envelope me-2"></i>Gửi yêu cầu tư vấn
-                     </a>
+               <?php if ($current_term->description) : ?>
+                  <div class="term-description mb-4">
+                     <?php echo wpautop($current_term->description); ?>
                   </div>
-               </div>
+               <?php endif; ?>
+
+               <?php if ($practice_posts->have_posts()) : ?>
+
+                  <div class="posts-list">
+                     <?php while ($practice_posts->have_posts()) : $practice_posts->the_post(); ?>
+                        <article class="post-item mb-4 pb-4 border-bottom">
+                           <div class="row">
+                              <?php if (has_post_thumbnail()) : ?>
+                                 <div class="col-md-4 mb-3 mb-md-0">
+                                    <a href="<?php the_permalink(); ?>">
+                                       <?php the_post_thumbnail('medium', array('class' => 'img-fluid rounded')); ?>
+                                    </a>
+                                 </div>
+                                 <div class="col-md-8">
+                              <?php else : ?>
+                                 <div class="col-12">
+                              <?php endif; ?>
+                                    <h3 class="post-title h5 mb-2">
+                                       <a href="<?php the_permalink(); ?>" class="text-dark"><?php the_title(); ?></a>
+                                    </h3>
+                                    <div class="post-meta text-muted mb-2" style="font-size: 14px;">
+                                       <span><i class="fas fa-calendar-alt me-1"></i><?php echo get_the_date('d/m/Y'); ?></span>
+                                    </div>
+                                    <div class="post-excerpt">
+                                       <?php the_excerpt(); ?>
+                                    </div>
+                                    <a href="<?php the_permalink(); ?>" class="btn btn-primary btn-sm">Xem thêm</a>
+                                 </div>
+                           </div>
+                        </article>
+                     <?php endwhile; ?>
+                  </div>
+
+                  <!-- Pagination -->
+                  <div class="pagination-wrapper mt-4">
+                     <?php
+                     echo paginate_links(array(
+                        'total' => $practice_posts->max_num_pages,
+                        'current' => $paged,
+                        'prev_text' => '<i class="fas fa-chevron-left"></i>',
+                        'next_text' => '<i class="fas fa-chevron-right"></i>',
+                        'type' => 'list',
+                        'class' => 'pagination justify-content-center'
+                     ));
+                     ?>
+                  </div>
+
+                  <?php wp_reset_postdata(); ?>
+
+               <?php else : ?>
+                  <div class="alert alert-info">
+                     <p class="mb-0">Hiện chưa có bài viết nào trong lĩnh vực này.</p>
+                  </div>
+               <?php endif; ?>
+
             </div>
          </div>
 
@@ -124,11 +140,12 @@ $featured_image = $page_thumbnail ? $page_thumbnail : $term_image_url;
                         foreach ($all_areas as $area) :
                            $is_current = ($area->term_id === $current_term->term_id);
                            $area_link = get_term_link($area);
+                           $post_count = $area->count;
                      ?>
                         <li class="mb-2">
                            <a href="<?php echo esc_url($area_link); ?>" class="d-flex justify-content-between align-items-center <?php echo $is_current ? 'active text-primary fw-bold' : ''; ?>">
                               <?php echo esc_html($area->name); ?>
-                              <span class="ion-ios-arrow-forward"></span>
+                              <span class="badge bg-secondary"><?php echo $post_count; ?></span>
                            </a>
                         </li>
                      <?php
@@ -151,12 +168,14 @@ $featured_image = $page_thumbnail ? $page_thumbnail : $term_image_url;
       </div>
    </div>
 </section>
-<!-- Practice Area Detail End -->
+<!-- Practice Area Posts List End -->
+
 <div class="container-fluid bg-primary">
    <div class="py-5">
       <div class="col-md-12 text-center">
-         <h3 class="stick text-white">"TVL Legal System - Đồng hành pháp lý, kiến tạo niềmtin!"</h3>
+         <h3 class="stick text-white">"TVL Legal System - Đồng hành pháp lý, kiến tạo niềm tin!"</h3>
       </div>
    </div>
 </div>
+
 <?php get_footer(); ?>
