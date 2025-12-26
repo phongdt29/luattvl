@@ -1,4 +1,8 @@
 <?php
+
+// Include Admin Guide
+require_once get_template_directory() . '/admin/huong-dan-su-dung.php';
+
 function tvl_setup_theme() {
     add_theme_support('post-thumbnails');
     add_theme_support('title-tag');
