@@ -479,7 +479,7 @@ get_header(); ?>
                   <div class="team-item">
                      <div class="team-img">
                         <?php if (has_post_thumbnail()) : ?>
-                           <?php the_post_thumbnail('thumbnail', array('class' => 'img-fluid', 'alt' => get_the_title())); ?>
+                           <?php the_post_thumbnail('medium_large', array('class' => 'img-fluid', 'alt' => get_the_title())); ?>
                         <?php else : ?>
                            <img src="<?php echo get_template_directory_uri(); ?>/public/img/team/default-avatar.png" class="img-fluid" alt="<?php the_title(); ?>">
                         <?php endif; ?>
