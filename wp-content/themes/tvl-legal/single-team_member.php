@@ -5,7 +5,7 @@
 ?>
 
 <!-- Page Header Start -->
-<div class="container-fluid page-header py-5">
+<div class="container-fluid page-header py-5" style="display: none">
    <div class="container text-center py-5">
       <h1 class="display-2 text-white mb-4 animated slideInDown"><?php the_title(); ?></h1>
    </div>
