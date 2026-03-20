@@ -13,7 +13,7 @@
 <!-- Page Header End -->
 
 <!-- Team Member Detail Start -->
-<div class="container-fluid py-5">
+<div class="container-fluid py-5 box">
    <div class="container">
       <div class="row g-5">
          <div class="col-lg-4">
@@ -64,5 +64,16 @@
    </div>
 </div>
 <?php endwhile; ?>
+<style>
+.box {
+  margin-top: 0; /* mobile */
+}
 
+@media (min-width: 769px) {
+  .box {
+    margin-top: 60px; /* desktop */
+  }
+}
+
+</style>
 <?php get_footer(); ?>

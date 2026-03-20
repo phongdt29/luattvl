@@ -1609,3 +1609,17 @@ function tvl_load_post_template($template) {
     return $template;
 }
 add_filter('single_template', 'tvl_load_post_template');
+
+// Remove prefix from archive titles
+add_filter( 'get_the_archive_title', function ($title) {
+    if ( is_category() ) {
+        $title = single_cat_title( '', false );
+    } elseif ( is_tag() ) {
+        $title = single_tag_title( '', false );
+    } elseif ( is_author() ) {
+        $title = '<span class="vcard">' . get_the_author() . '</span>';
+    }
+    return $title;
+});
+
+
